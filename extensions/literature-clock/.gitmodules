@@ -1,0 +1,3 @@
+[submodule "literature-clock"]
+	path = literature-clock
+	url = git@github.com:JohannesNE/literature-clock.git
