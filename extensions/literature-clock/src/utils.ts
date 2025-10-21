@@ -76,3 +76,48 @@ export function getTimeText(date?: Date): string {
     minute: "2-digit",
   });
 }
+
+/**
+ * Strips HTML tags from a string
+ * @param html String that may contain HTML tags
+ * @returns String with HTML tags removed
+ */
+export function stripHtmlTags(html: string): string {
+  return html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Splits a long quote into multiple lines for better display in menu
+ * @param quote The quote text to split
+ * @param maxLineLength Maximum characters per line (default: 80)
+ * @returns Array of lines that fit within the character limit
+ */
+export function splitQuoteIntoLines(quote: string, maxLineLength: number = 80): string[] {
+  const words = quote.split(" ");
+  const lines: string[] = [];
+  let currentLine = "";
+
+  for (const word of words) {
+    if (!word) continue;
+
+    const testLine = currentLine ? `${currentLine} ${word}` : word;
+
+    if (testLine.length <= maxLineLength) {
+      currentLine = testLine;
+    } else {
+      if (currentLine) {
+        lines.push(currentLine);
+      }
+      currentLine = word;
+    }
+  }
+
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+
+  return lines;
+}
