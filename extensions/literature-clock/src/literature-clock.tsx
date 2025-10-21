@@ -4,9 +4,9 @@ import { useEffect } from "react";
 import {
   getRandomQuoteForCurrentTime,
   getTimeText,
-  stripHtmlTags,
-  splitQuoteIntoLines,
   type LiteratureClockEntry,
+  splitQuoteIntoLines,
+  stripHtmlTags,
 } from "./utils";
 
 export default function Command() {
@@ -41,7 +41,7 @@ export default function Command() {
     <MenuBarExtra tooltip={`${title} by ${author}`} title={timeString || time || "⏰"}>
       <MenuBarExtra.Section title={`${time} - ${title}`}>
         {quoteLines.map((line, index) => (
-          <MenuBarExtra.Item key={index} title={`"${line}${index === quoteLines.length - 1 ? '"' : ""}`} />
+          <MenuBarExtra.Item key={index} title={line} />
         ))}
         <MenuBarExtra.Item title={`— ${author}`} />
       </MenuBarExtra.Section>
