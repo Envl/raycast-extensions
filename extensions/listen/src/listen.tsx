@@ -1,21 +1,22 @@
 import {
-  ActionPanel,
   Action,
-  showToast,
-  Toast,
+  ActionPanel,
+  AI,
   Clipboard,
-  Icon,
   Detail,
-  LaunchProps,
+  environment,
   getPreferenceValues,
+  Icon,
+  type LaunchProps,
   List,
   popToRoot,
-  AI,
-  environment,
+  showToast,
+  Toast,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { spawn } from "child_process";
-import { join } from "path";
+import type { ChildProcess } from "child_process";
+import { useEffect, useRef, useState } from "react";
+import { refineTranscription } from "./utils/ai";
+import { handleStopRecording, startTranscription } from "./utils/transcribe";
 
 interface Arguments {
   locale?: string;
@@ -28,7 +29,7 @@ interface Preferences {
   autoRefine: boolean;
 }
 
-// List view with actions
+//MARK: List view with actions
 function TranscriptionActionsList({
   transcriptionText,
   locale,
@@ -43,6 +44,10 @@ function TranscriptionActionsList({
   const [isRefining, setIsRefining] = useState(false);
   const [refinedText, setRefinedText] = useState("");
 
+  const wordCount = transcriptionText.split(/\s+/).filter((w) => w.trim()).length;
+  const charCount = transcriptionText.length;
+  const isRefined = !!refinedText;
+
   // Auto-refine effect when component mounts if autoRefine is enabled
   useEffect(() => {
     if (autoRefine && !refinedText && environment.canAccess(AI)) {
@@ -50,65 +55,24 @@ function TranscriptionActionsList({
     }
   }, []);
 
+  /**
+   * MARK: functions
+   */
   async function handleRefineWithAI() {
-    if (!transcriptionText.trim()) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No transcription to refine",
-      });
-      return;
-    }
-
-    // Check if AI is available
-    if (!environment.canAccess(AI)) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "AI Not Available",
-        message: "Please upgrade to Raycast Pro to use AI features",
-      });
-      return;
-    }
-
-    setIsRefining(true);
-
-    try {
-      const toast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Refining transcription...",
-      });
-
-      const prompt = `Please refine and improve the following transcription. Fix any grammar errors, punctuation, and formatting issues. Keep the meaning and content the same, just make it more polished and professional:
-<transcript>
-${transcriptionText}
-</transcript>
-
-- keep it in original language
-- only output refined text, no explanations`;
-
-      const answer = await AI.ask(prompt, {
-        creativity: 0.3, // Low creativity for accurate refinement
-        model: AI.Model["OpenAI_GPT5-mini"],
-      });
-
-      setRefinedText(answer);
-
-      toast.style = Toast.Style.Success;
-      toast.title = "Refinement Complete";
-      toast.message = "AI has improved your transcription";
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Refinement Failed",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
-    } finally {
-      setIsRefining(false);
-    }
+    if (isRefining) return;
+    refineTranscription({
+      transcriptionText,
+      onStart() {
+        setIsRefining(true);
+      },
+      onSuccess(refinedText) {
+        setRefinedText(refinedText);
+      },
+      onComplete() {
+        setIsRefining(false);
+      },
+    });
   }
-
-  const wordCount = transcriptionText.split(/\s+/).filter((w) => w.trim()).length;
-  const charCount = transcriptionText.length;
-  const isRefined = !!refinedText;
 
   async function handlePasteOriginal() {
     if (transcriptionText.trim()) {
@@ -144,6 +108,7 @@ ${transcriptionText}
     }
   }
 
+  // MARK: rendering
   const OriginalItem = (
     <List.Item
       id="original-text"
@@ -281,6 +246,8 @@ ${transcriptionText}
   );
 }
 
+// MARK: Transcription View
+
 function TranscriptionView({
   locale,
   onDevice,
@@ -293,7 +260,7 @@ function TranscriptionView({
   const [transcriptionText, setTranscriptionText] = useState("");
   const [isRecording, setIsRecording] = useState(true);
   const [isMicReady, setIsMicReady] = useState(false);
-  const [childProcess, setChildProcess] = useState<ReturnType<typeof spawn> | null>(null);
+  const childProcessRef = useRef<ChildProcess | null>(null);
   const [showActionsList, setShowActionsList] = useState(false);
   const [maybeBlinkDot, setMaybeBlinkDot] = useState("");
 
@@ -315,116 +282,49 @@ function TranscriptionView({
 
   // Start transcription on mount
   useEffect(() => {
-    startTranscription();
+    startTranscriptionSession();
   }, []);
 
-  async function startTranscription() {
-    const binaryPath = join(environment.assetsPath, "transcribe");
-
-    // Use a very long duration since we'll stop it manually
-    const args: string[] = ["-d", "3000", "-l", locale, "-s"];
-
-    if (onDevice) {
-      args.push("-o");
-    }
-
-    let buffer = "";
-
-    const process = spawn(binaryPath, args);
-    setChildProcess(process);
-
-    process.stdout.on("data", (data) => {
-      buffer += data.toString();
-
-      // Process complete lines
-      const lines = buffer.split("\n");
-      buffer = lines.pop() || "";
-
-      for (const line of lines) {
-        if (!line.trim()) continue;
-
-        try {
-          const event = JSON.parse(line);
-
-          switch (event.type) {
-            case "recording_started":
-              setIsMicReady(true);
-              break;
-
-            case "partial":
-              if (event.text) {
-                setTranscriptionText(event.text);
-              }
-              break;
-
-            case "completed":
-              setIsRecording(false);
-              break;
-
-            case "error": {
-              const errorMsg = event.message || "Unknown error";
-              setIsRecording(false);
-              showToast({
-                style: Toast.Style.Failure,
-                title: "Transcription Failed",
-                message: errorMsg,
-              });
-              break;
-            }
-          }
-        } catch (error) {
-          console.error("Failed to parse stream event:", line, error);
-        }
-      }
+  // MARK: functions
+  async function startTranscriptionSession() {
+    const process = startTranscription({
+      locale,
+      onDevice,
+      callbacks: {
+        onRecordingStarted: () => {
+          setIsMicReady(true);
+        },
+        onPartialResult: (text) => {
+          setTranscriptionText(text);
+        },
+        onCompleted: () => {
+          setIsRecording(false);
+        },
+        onError: async (message) => {
+          setIsRecording(false);
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Transcription Failed",
+            message,
+          });
+        },
+      },
     });
 
-    process.stderr.on("data", (data) => {
-      console.error("Transcription stderr:", data.toString());
-    });
-
-    process.on("error", async (error) => {
-      const errorMsg = `Failed to start transcription process: ${error.message}`;
-      setIsRecording(false);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to Start",
-        message: errorMsg,
-      });
-    });
-
-    process.on("close", (code) => {
-      if (code !== 0 && code !== null) {
-        setIsRecording(false);
-      }
-    });
+    childProcessRef.current = process;
   }
 
   async function stopRecording() {
-    if (childProcess && isRecording) {
-      setIsRecording(false);
-      console.log("Sending STOP to transcription process via stdin");
-
-      try {
-        if (childProcess.stdin) {
-          childProcess.stdin.write("STOP\n");
-          childProcess.stdin.end();
-        } else {
-          console.warn("Transcription process stdin is not available, falling back to SIGTERM");
-          childProcess.kill("SIGTERM");
-        }
-      } catch (error) {
-        console.error("Failed to send STOP to process, falling back to SIGTERM:", error);
-        childProcess.kill("SIGTERM");
-      }
-
-      // Automatically show actions list after stopping
-      setTimeout(() => {
-        if (transcriptionText.trim()) {
-          setShowActionsList(true);
-        }
-      }, 100);
-    }
+    handleStopRecording({
+      childProcess: childProcessRef.current,
+      isRecording,
+      transcriptionText,
+      onStop: () => setIsRecording(false),
+      onShowActions: () => setShowActionsList(true),
+    });
   }
+
+  // MARK:rendering
 
   // Show actions list if recording stopped and we have transcription
   if (!isRecording && transcriptionText && showActionsList) {
@@ -445,10 +345,6 @@ function TranscriptionView({
   const charCount = transcriptionText.length;
 
   const markdown = `${transcriptionText ? `${transcriptionText}${maybeBlinkDot}` : isRecording ? (isMicReady ? "Listening..." : "Opening Mic...") : "_No transcription_"}`;
-
-  /**
-   * MARK:rendering
-   */
 
   const metadata = (
     <Detail.Metadata>
