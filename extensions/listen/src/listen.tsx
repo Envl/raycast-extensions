@@ -17,6 +17,7 @@ import type { ChildProcess } from "child_process";
 import { useEffect, useRef, useState } from "react";
 import { refineTranscription } from "./utils/ai";
 import { handleStopRecording, startTranscription } from "./utils/transcribe";
+import { useProductionSafeMount } from "./utils/use-production-safe-mount";
 
 interface Arguments {
   locale?: string;
@@ -44,12 +45,14 @@ function TranscriptionActionsList({
   const [isRefining, setIsRefining] = useState(false);
   const [refinedText, setRefinedText] = useState("");
 
+  const refiningRef = useRef(false);
+
   const wordCount = transcriptionText.split(/\s+/).filter((w) => w.trim()).length;
   const charCount = transcriptionText.length;
   const isRefined = !!refinedText;
 
   // Auto-refine effect when component mounts if autoRefine is enabled
-  useEffect(() => {
+  useProductionSafeMount(() => {
     if (autoRefine && !refinedText && environment.canAccess(AI)) {
       handleRefineWithAI();
     }
@@ -59,16 +62,20 @@ function TranscriptionActionsList({
    * MARK: functions
    */
   async function handleRefineWithAI() {
-    if (isRefining) return;
+    if (refiningRef.current) {
+      return;
+    }
     refineTranscription({
       transcriptionText,
       onStart() {
+        refiningRef.current = true;
         setIsRefining(true);
       },
       onSuccess(refinedText) {
         setRefinedText(refinedText);
       },
       onComplete() {
+        refiningRef.current = false;
         setIsRefining(false);
       },
     });
@@ -282,7 +289,7 @@ function TranscriptionView({
   }, [isRecording]);
 
   // Start transcription on mount
-  useEffect(() => {
+  useProductionSafeMount(() => {
     startTranscriptionSession();
   }, []);
 

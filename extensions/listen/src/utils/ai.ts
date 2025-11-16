@@ -52,13 +52,26 @@ export async function refineTranscription(options: RefineTranscriptionOptions): 
       title: "Refining transcription...",
     });
 
-    const prompt = `Please refine and improve the following transcription. Fix any grammar errors, punctuation, and formatting issues. Keep the meaning and content the same, just make it more polished and professional:
-<transcript>
-${transcriptionText}
-</transcript>
+    const prompt = `You are given a raw, low-quality speech transcription.
 
-- keep it in original language
-- only output refined text, no explanations`;
+Task:
+Refine and improve the transcription by:
+* Correcting speech recognition errors (misheard or garbled words, wrong homophones, etc.) based on context
+* Fixing grammar, spelling, punctuation, and basic formatting
+* Preserving the original meaning, intent, and style
+
+Instructions:
+* Do NOT add any new information, explanations, or commentary
+* Do NOT change names, technical terms, or specific wording unless they are clearly speech recognition errors
+* Keep the text in the original language
+* Output ONLY the refined transcript text, with no extra comments, labels, or markdown
+* Fix speech recognitions based on context and your knowledge
+
+Transcript to refine:
+<transcription>
+${transcriptionText}
+</transcription>
+`;
 
     const answer = await AI.ask(prompt, {
       creativity: 0.3, // Low creativity for accurate refinement
