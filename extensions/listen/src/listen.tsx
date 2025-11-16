@@ -263,6 +263,7 @@ function TranscriptionView({
   const childProcessRef = useRef<ChildProcess | null>(null);
   const [showActionsList, setShowActionsList] = useState(false);
   const [maybeBlinkDot, setMaybeBlinkDot] = useState("");
+  const acceptUpdatesRef = useRef(true);
 
   // when transcribing, blink dot 500ms
   useEffect(() => {
@@ -295,7 +296,9 @@ function TranscriptionView({
           setIsMicReady(true);
         },
         onPartialResult: (text) => {
-          setTranscriptionText(text);
+          if (acceptUpdatesRef.current) {
+            setTranscriptionText(text);
+          }
         },
         onCompleted: () => {
           setIsRecording(false);
@@ -315,6 +318,9 @@ function TranscriptionView({
   }
 
   async function stopRecording() {
+    // Stop accepting any further updates
+    acceptUpdatesRef.current = false;
+
     handleStopRecording({
       childProcess: childProcessRef.current,
       isRecording,
