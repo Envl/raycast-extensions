@@ -59,13 +59,16 @@ Refine and improve the transcription by:
 * Correcting speech recognition errors (misheard or garbled words, wrong homophones, etc.) based on context
 * Fixing grammar, spelling, punctuation, and basic formatting
 * Preserving the original meaning, intent, and style
+* Removing repetition, filler words, and false starts
+* Keeping proper nouns, names, and technical terms as appropriate
+* In latter part of any transcript, the user might ad‑hoc correct words that were recognized incorrectly beforehand — just correct those words as indicated without changing the rest of the transcript
 
 Instructions:
 * Do NOT add any new information, explanations, or commentary
 * Do NOT change names, technical terms, or specific wording unless they are clearly speech recognition errors
 * Keep the text in the original language
 * Output ONLY the refined transcript text, with no extra comments, labels, or markdown
-* Fix speech recognitions based on context and your knowledge
+* Fix speech recognition mistakes based on context and your knowledge
 
 Transcript to refine:
 <transcription>
