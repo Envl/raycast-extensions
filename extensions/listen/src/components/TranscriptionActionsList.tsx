@@ -376,7 +376,6 @@ export function TranscriptionActionsList({
       title: "Pasted Original",
       message: "Original transcription pasted to active app",
     });
-    await popToRoot();
   }
 
   async function handleCopyOriginal() {
@@ -397,7 +396,6 @@ export function TranscriptionActionsList({
       title: "Pasted Refined",
       message: "Refined transcription pasted to active app",
     });
-    await popToRoot();
   }
 
   async function handleCopyRefined() {
@@ -439,7 +437,6 @@ export function TranscriptionActionsList({
       title: "Pasted Translation",
       message: `Translation (${translatedLanguage}) pasted to active app`,
     });
-    await popToRoot();
   }
 
   async function handleCopyTranslated() {
