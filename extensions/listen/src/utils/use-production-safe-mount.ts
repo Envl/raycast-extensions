@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function useProductionSafeMount(mountFn: () => void | (() => void), deps: any[] = []) {
+export function useProductionSafeMount(mountFn: () => void, deps: unknown[] = []) {
   const hasRun = useRef(false);
   const cleanupRef = useRef<(() => void) | null>(null);
 
@@ -19,17 +18,9 @@ export function useProductionSafeMount(mountFn: () => void | (() => void), deps:
     }
 
     return () => {
-      hasRun.current = false;
       cleanupRef.current?.();
       cleanupRef.current = null;
+      // Don't reset hasRun here - keep it true to prevent re-execution
     };
   }, deps);
-
-  // Reset on unmount
-  useEffect(() => {
-    return () => {
-      hasRun.current = false;
-      cleanupRef.current = null;
-    };
-  }, []);
 }

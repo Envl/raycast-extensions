@@ -97,3 +97,90 @@ ${transcriptionText}
     onComplete?.();
   }
 }
+
+export interface TranslateTextOptions {
+  text: string;
+  targetLanguage: string;
+  onStart?: () => void;
+  onSuccess?: (translatedText: string) => void;
+  onError?: (error: string) => void;
+  onComplete?: () => void;
+}
+
+/**
+ * Translate text to a target language using AI
+ */
+export async function translateText(options: TranslateTextOptions): Promise<string | null> {
+  const { text, targetLanguage, onStart, onSuccess, onError, onComplete } = options;
+
+  if (!text.trim()) {
+    const errorMsg = "No text to translate";
+    await showToast({
+      style: Toast.Style.Failure,
+      title: errorMsg,
+    });
+    onError?.(errorMsg);
+    return null;
+  }
+
+  // Check if AI is available
+  if (!isAIAvailable()) {
+    const errorMsg = "Please upgrade to Raycast Pro to use AI features";
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "AI Not Available",
+      message: errorMsg,
+    });
+    onError?.(errorMsg);
+    return null;
+  }
+
+  onStart?.();
+
+  try {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `Translating to ${targetLanguage}...`,
+    });
+
+    const prompt = `You are a professional translator.
+
+Task:
+Translate the following text to ${targetLanguage}.
+
+Instructions:
+* Preserve the original meaning, tone, and style
+* Keep proper nouns, names, and technical terms as appropriate
+* Output ONLY the translated text, with no extra comments, labels, or markdown
+* If the text is already in ${targetLanguage}, return it as-is with minor improvements if needed
+
+Text to translate:
+<text>
+${text}
+</text>
+`;
+
+    const answer = await AI.ask(prompt, {
+      creativity: 0.3,
+      model: AI.Model["OpenAI_GPT5-mini"],
+    });
+
+    toast.style = Toast.Style.Success;
+    toast.title = "Translation Complete";
+    toast.message = `Translated to ${targetLanguage}`;
+
+    onSuccess?.(answer);
+    return answer;
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : "Unknown error";
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Translation Failed",
+      message: errorMsg,
+    });
+    onError?.(errorMsg);
+    return null;
+  } finally {
+    onComplete?.();
+  }
+}

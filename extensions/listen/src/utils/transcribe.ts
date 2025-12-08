@@ -1,19 +1,22 @@
-import { environment } from "@raycast/api";
-import { type ChildProcess, spawn } from "child_process";
-import { join } from "path";
+import {
+  cleanupStatusFile,
+  getStatusFilePath,
+  startTranscription as swiftStartTranscription,
+  stopTranscription as swiftStopTranscription,
+} from "swift:../../swift/transcribe";
+import { existsSync, readFileSync } from "fs";
 
 export interface StreamEvent {
-  type: "recording_started" | "partial" | "completed" | "error";
+  type: "initializing" | "recording_started" | "partial" | "completed" | "error";
   text?: string;
   message?: string;
-  duration?: number;
   timestamp: number;
 }
 
 export interface TranscriptionCallbacks {
   onRecordingStarted?: () => void;
   onPartialResult?: (text: string) => void;
-  onCompleted?: () => void;
+  onCompleted?: (finalText: string) => void;
   onError?: (message: string) => void;
 }
 
@@ -23,106 +26,111 @@ export interface TranscriptionOptions {
   callbacks?: TranscriptionCallbacks;
 }
 
-/**
- * Start a streaming transcription session
- * Returns a ChildProcess that can be controlled (stopped via stdin)
- */
-export function startTranscription(options: TranscriptionOptions): ChildProcess {
-  const { locale, onDevice, callbacks } = options;
-
-  const binaryPath = join(environment.assetsPath, "transcribe");
-
-  // Use a very long duration since we'll stop it manually
-  const args: string[] = ["-d", "3000", "-l", locale, "-s"];
-
-  if (onDevice) {
-    args.push("-o");
-  }
-
-  let buffer = "";
-
-  const process = spawn(binaryPath, args);
-
-  process.stdout.on("data", (data) => {
-    buffer += data.toString();
-
-    // Process complete lines
-    const lines = buffer.split("\n");
-    buffer = lines.pop() || "";
-
-    for (const line of lines) {
-      if (!line.trim()) continue;
-
-      try {
-        const event = JSON.parse(line) as StreamEvent;
-
-        switch (event.type) {
-          case "recording_started":
-            callbacks?.onRecordingStarted?.();
-            break;
-
-          case "partial":
-            if (event.text) {
-              callbacks?.onPartialResult?.(event.text);
-            }
-            break;
-
-          case "completed":
-            callbacks?.onCompleted?.();
-            break;
-
-          case "error": {
-            const errorMsg = event.message || "Unknown error";
-            callbacks?.onError?.(errorMsg);
-            break;
-          }
-        }
-      } catch (error) {
-        console.error("Failed to parse stream event:", line, error);
-      }
-    }
-  });
-
-  process.stderr.on("data", (data) => {
-    console.error("Transcription stderr:", data.toString());
-  });
-
-  process.on("error", (error) => {
-    const errorMsg = `Failed to start transcription process: ${error.message}`;
-    callbacks?.onError?.(errorMsg);
-  });
-
-  process.on("close", (code) => {
-    if (code !== 0 && code !== null) {
-      callbacks?.onError?.(`Process exited with code ${code}`);
-    }
-  });
-
-  return process;
+export interface TranscriptionSession {
+  stop: () => Promise<void>;
 }
 
 /**
- * Stop a running transcription process gracefully
+ * Start a streaming transcription session using file-based IPC
  */
-export function stopTranscription(process: ChildProcess): void {
-  console.log("Sending STOP to transcription process via stdin");
+export async function startTranscription(options: TranscriptionOptions): Promise<TranscriptionSession> {
+  const { locale, onDevice, callbacks } = options;
 
-  try {
-    if (process.stdin) {
-      process.stdin.write("STOP\n");
-      process.stdin.end();
-    } else {
-      console.warn("Transcription process stdin is not available, falling back to SIGTERM");
-      process.kill("SIGTERM");
-    }
-  } catch (error) {
-    console.error("Failed to send STOP to process, falling back to SIGTERM:", error);
-    process.kill("SIGTERM");
-  }
+  // Get the status file path
+  const statusFilePath = await getStatusFilePath();
+  let lastTimestamp = 0;
+  let isRunning = true;
+  let pollInterval: NodeJS.Timeout | null = null;
+
+  // Clean up any existing status file
+  await cleanupStatusFile();
+
+  // Start watching the status file for changes
+  const startWatching = () => {
+    const checkFile = () => {
+      if (!isRunning) return;
+
+      try {
+        if (existsSync(statusFilePath)) {
+          const content = readFileSync(statusFilePath, "utf-8");
+          const event = JSON.parse(content) as StreamEvent;
+
+          // Only process new events
+          if (event.timestamp > lastTimestamp) {
+            lastTimestamp = event.timestamp;
+
+            switch (event.type) {
+              case "recording_started":
+                callbacks?.onRecordingStarted?.();
+                break;
+
+              case "partial":
+                if (event.text) {
+                  callbacks?.onPartialResult?.(event.text);
+                }
+                break;
+
+              case "completed":
+                callbacks?.onCompleted?.(event.text || "");
+                isRunning = false;
+                break;
+
+              case "error":
+                callbacks?.onError?.(event.message || "Unknown error");
+                isRunning = false;
+                break;
+            }
+          }
+        }
+      } catch {
+        // File might be being written, ignore parse errors
+      }
+    };
+
+    // Poll the file every 100ms for changes
+    pollInterval = setInterval(() => {
+      if (!isRunning) {
+        if (pollInterval) clearInterval(pollInterval);
+        return;
+      }
+      checkFile();
+    }, 100);
+
+    return () => {
+      if (pollInterval) clearInterval(pollInterval);
+    };
+  };
+
+  const stopPolling = startWatching();
+
+  // Start the Swift transcription in background
+  // Note: This will block until transcription completes
+  const transcriptionPromise = swiftStartTranscription(3000, locale, onDevice);
+
+  // Handle completion
+  transcriptionPromise
+    .then(() => {
+      isRunning = false;
+      stopPolling();
+    })
+    .catch((error) => {
+      isRunning = false;
+      stopPolling();
+      callbacks?.onError?.(String(error));
+    });
+
+  return {
+    stop: async () => {
+      // Signal Swift to stop transcription
+      await swiftStopTranscription();
+      isRunning = false;
+      stopPolling();
+    },
+  };
 }
 
 export interface StopRecordingOptions {
-  childProcess: ChildProcess | null;
+  session: TranscriptionSession | null;
   isRecording: boolean;
   transcriptionText: string;
   onStop: () => void;
@@ -132,12 +140,12 @@ export interface StopRecordingOptions {
 /**
  * Stop recording and handle the post-stop flow
  */
-export function handleStopRecording(options: StopRecordingOptions): void {
-  const { childProcess, isRecording, transcriptionText, onStop, onShowActions } = options;
+export async function handleStopRecording(options: StopRecordingOptions): Promise<void> {
+  const { session, isRecording, transcriptionText, onStop, onShowActions } = options;
 
-  if (childProcess && isRecording) {
+  if (session && isRecording) {
     onStop();
-    stopTranscription(childProcess);
+    await session.stop();
 
     // Automatically show actions list after stopping
     setTimeout(() => {
@@ -145,5 +153,17 @@ export function handleStopRecording(options: StopRecordingOptions): void {
         onShowActions();
       }
     }, 100);
+  }
+}
+
+/**
+ * Cleanup transcription resources - call this when component unmounts
+ */
+export async function cleanupTranscription(): Promise<void> {
+  try {
+    await swiftStopTranscription();
+    await cleanupStatusFile();
+  } catch {
+    // Ignore cleanup errors
   }
 }

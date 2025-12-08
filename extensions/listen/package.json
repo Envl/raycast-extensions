@@ -1,221 +1,221 @@
 {
-  "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "listen",
-  "title": "Listen",
-  "description": "Apple native transcribing and AI refinement",
-  "icon": "extension-icon.png",
-  "author": "Envl",
-  "platforms": [
-    "macOS"
-  ],
-  "categories": [
-    "Productivity",
-    "Communication"
-  ],
-  "license": "MIT",
-  "dependencies": {
-    "@raycast/api": "^1.103.6",
-    "@raycast/utils": "^1.17.0"
-  },
-  "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
-  },
-  "scripts": {
-    "build": "ray build",
-    "dev": "ray develop",
-    "fix-lint": "ray lint --fix",
-    "lint": "ray lint",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
-  },
-  "commands": [
-    {
-      "name": "listen",
-      "title": "Listen",
-      "subtitle": "Real-time speech transcribe and AI refinement",
-      "description": "Use macOS native speech recognition API to transcribe and refine with Raycast AI",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "locale",
-          "type": "dropdown",
-          "placeholder": "Language",
-          "required": false,
-          "data": [
-            {
-              "title": "English (US)",
-              "value": "en-US"
-            },
-            {
-              "title": "English (UK)",
-              "value": "en-GB"
-            },
-            {
-              "title": "English (Australia)",
-              "value": "en-AU"
-            },
-            {
-              "title": "Spanish (Spain)",
-              "value": "es-ES"
-            },
-            {
-              "title": "Spanish (Mexico)",
-              "value": "es-MX"
-            },
-            {
-              "title": "French",
-              "value": "fr-FR"
-            },
-            {
-              "title": "German",
-              "value": "de-DE"
-            },
-            {
-              "title": "Italian",
-              "value": "it-IT"
-            },
-            {
-              "title": "Japanese",
-              "value": "ja-JP"
-            },
-            {
-              "title": "Korean",
-              "value": "ko-KR"
-            },
-            {
-              "title": "Chinese (Simplified)",
-              "value": "zh-CN"
-            },
-            {
-              "title": "Chinese (Traditional)",
-              "value": "zh-TW"
-            },
-            {
-              "title": "Portuguese (Brazil)",
-              "value": "pt-BR"
-            },
-            {
-              "title": "Russian",
-              "value": "ru-RU"
-            },
-            {
-              "title": "Dutch",
-              "value": "nl-NL"
-            }
-          ]
-        },
-        {
-          "name": "recognitionMode",
-          "type": "dropdown",
-          "placeholder": "Recognition Mode",
-          "required": false,
-          "data": [
-            {
-              "title": "On-Device (Private)",
-              "value": "on-device"
-            },
-            {
-              "title": "Server-Based (More Accurate)",
-              "value": "server"
-            }
-          ]
-        }
-      ]
-    }
-  ],
-  "preferences": [
-    {
-      "name": "onDeviceOnly",
-      "type": "checkbox",
-      "required": false,
-      "title": "On-Device Recognition Only",
-      "description": "Use on-device processing for better privacy (some languages only)",
-      "default": false,
-      "label": "Enable on-device processing"
-    },
-    {
-      "name": "autoRefine",
-      "type": "checkbox",
-      "required": false,
-      "title": "Auto-Refine with AI",
-      "description": "Automatically refine transcriptions with AI when recording stops (requires Raycast Pro)",
-      "default": false,
-      "label": "Enable automatic AI refinement"
-    },
-    {
-      "name": "locale",
-      "type": "dropdown",
-      "required": false,
-      "title": "Language",
-      "description": "Speech recognition language",
-      "default": "en-US",
-      "data": [
-        {
-          "title": "English (US)",
-          "value": "en-US"
-        },
-        {
-          "title": "English (UK)",
-          "value": "en-GB"
-        },
-        {
-          "title": "English (Australia)",
-          "value": "en-AU"
-        },
-        {
-          "title": "Spanish (Spain)",
-          "value": "es-ES"
-        },
-        {
-          "title": "Spanish (Mexico)",
-          "value": "es-MX"
-        },
-        {
-          "title": "French",
-          "value": "fr-FR"
-        },
-        {
-          "title": "German",
-          "value": "de-DE"
-        },
-        {
-          "title": "Italian",
-          "value": "it-IT"
-        },
-        {
-          "title": "Japanese",
-          "value": "ja-JP"
-        },
-        {
-          "title": "Korean",
-          "value": "ko-KR"
-        },
-        {
-          "title": "Chinese (Simplified)",
-          "value": "zh-CN"
-        },
-        {
-          "title": "Chinese (Traditional)",
-          "value": "zh-TW"
-        },
-        {
-          "title": "Portuguese (Brazil)",
-          "value": "pt-BR"
-        },
-        {
-          "title": "Russian",
-          "value": "ru-RU"
-        },
-        {
-          "title": "Dutch",
-          "value": "nl-NL"
-        }
-      ]
-    }
-  ]
+	"$schema": "https://www.raycast.com/schemas/extension.json",
+	"name": "listen",
+	"title": "Listen",
+	"description": "Apple native transcribing and AI refinement",
+	"icon": "extension-icon.png",
+	"author": "Envl",
+	"platforms": [
+		"macOS"
+	],
+	"categories": [
+		"Productivity",
+		"Communication"
+	],
+	"license": "MIT",
+	"dependencies": {
+		"@raycast/api": "^1.103.6",
+		"@raycast/utils": "^1.17.0"
+	},
+	"devDependencies": {
+		"@raycast/eslint-config": "^2.0.4",
+		"@types/node": "22.13.10",
+		"@types/react": "19.0.10",
+		"eslint": "^9.22.0",
+		"prettier": "^3.5.3",
+		"typescript": "^5.8.2"
+	},
+	"scripts": {
+		"build": "ray build",
+		"dev": "ray develop",
+		"fix-lint": "ray lint --fix",
+		"lint": "ray lint",
+		"prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+		"publish": "npx @raycast/api@latest publish"
+	},
+	"commands": [
+		{
+			"name": "listen",
+			"title": "Listen",
+			"subtitle": "Real-time speech transcribe and AI refinement",
+			"description": "Use macOS native speech recognition API to transcribe and refine with Raycast AI",
+			"mode": "view",
+			"arguments": [
+				{
+					"name": "locale",
+					"type": "dropdown",
+					"placeholder": "Language",
+					"required": false,
+					"data": [
+						{
+							"title": "English (US)",
+							"value": "en-US"
+						},
+						{
+							"title": "English (UK)",
+							"value": "en-GB"
+						},
+						{
+							"title": "English (Australia)",
+							"value": "en-AU"
+						},
+						{
+							"title": "Spanish (Spain)",
+							"value": "es-ES"
+						},
+						{
+							"title": "Spanish (Mexico)",
+							"value": "es-MX"
+						},
+						{
+							"title": "French",
+							"value": "fr-FR"
+						},
+						{
+							"title": "German",
+							"value": "de-DE"
+						},
+						{
+							"title": "Italian",
+							"value": "it-IT"
+						},
+						{
+							"title": "Japanese",
+							"value": "ja-JP"
+						},
+						{
+							"title": "Korean",
+							"value": "ko-KR"
+						},
+						{
+							"title": "Chinese (Simplified)",
+							"value": "zh-CN"
+						},
+						{
+							"title": "Chinese (Traditional)",
+							"value": "zh-TW"
+						},
+						{
+							"title": "Portuguese (Brazil)",
+							"value": "pt-BR"
+						},
+						{
+							"title": "Russian",
+							"value": "ru-RU"
+						},
+						{
+							"title": "Dutch",
+							"value": "nl-NL"
+						}
+					]
+				},
+				{
+					"name": "recognitionMode",
+					"type": "dropdown",
+					"placeholder": "Recognition Mode",
+					"required": false,
+					"data": [
+						{
+							"title": "On-Device (Private)",
+							"value": "on-device"
+						},
+						{
+							"title": "Server-Based (More Accurate)",
+							"value": "server"
+						}
+					]
+				}
+			]
+		}
+	],
+	"preferences": [
+		{
+			"name": "onDeviceOnly",
+			"type": "checkbox",
+			"required": false,
+			"title": "On-Device Recognition Only",
+			"description": "Use on-device processing for better privacy (some languages only)",
+			"default": false,
+			"label": "Enable on-device processing"
+		},
+		{
+			"name": "autoRefine",
+			"type": "checkbox",
+			"required": false,
+			"title": "Auto-Refine with AI",
+			"description": "Automatically refine transcriptions with AI when recording stops (requires Raycast Pro)",
+			"default": false,
+			"label": "Enable automatic AI refinement"
+		},
+		{
+			"name": "locale",
+			"type": "dropdown",
+			"required": false,
+			"title": "Language",
+			"description": "Speech recognition language",
+			"default": "en-US",
+			"data": [
+				{
+					"title": "English (US)",
+					"value": "en-US"
+				},
+				{
+					"title": "English (UK)",
+					"value": "en-GB"
+				},
+				{
+					"title": "English (Australia)",
+					"value": "en-AU"
+				},
+				{
+					"title": "Spanish (Spain)",
+					"value": "es-ES"
+				},
+				{
+					"title": "Spanish (Mexico)",
+					"value": "es-MX"
+				},
+				{
+					"title": "French",
+					"value": "fr-FR"
+				},
+				{
+					"title": "German",
+					"value": "de-DE"
+				},
+				{
+					"title": "Italian",
+					"value": "it-IT"
+				},
+				{
+					"title": "Japanese",
+					"value": "ja-JP"
+				},
+				{
+					"title": "Korean",
+					"value": "ko-KR"
+				},
+				{
+					"title": "Chinese (Simplified)",
+					"value": "zh-CN"
+				},
+				{
+					"title": "Chinese (Traditional)",
+					"value": "zh-TW"
+				},
+				{
+					"title": "Portuguese (Brazil)",
+					"value": "pt-BR"
+				},
+				{
+					"title": "Russian",
+					"value": "ru-RU"
+				},
+				{
+					"title": "Dutch",
+					"value": "nl-NL"
+				}
+			]
+		}
+	]
 }
