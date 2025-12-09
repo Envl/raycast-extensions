@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, showToast, Toast } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
+import type { AIModelPreference } from "../utils/ai";
 import {
   cleanupTranscription,
   handleStopRecording,
@@ -13,10 +14,11 @@ export interface TranscriptionViewProps {
   locale: string;
   onDevice: boolean;
   autoRefine: boolean;
+  aiModel: AIModelPreference;
   onLocaleUsed?: (locale: string) => Promise<void>;
 }
 
-export function TranscriptionView({ locale, onDevice, autoRefine, onLocaleUsed }: TranscriptionViewProps) {
+export function TranscriptionView({ locale, onDevice, autoRefine, aiModel, onLocaleUsed }: TranscriptionViewProps) {
   const [transcriptionText, setTranscriptionText] = useState("");
   const [isRecording, setIsRecording] = useState(true);
   const [isMicReady, setIsMicReady] = useState(false);
@@ -111,6 +113,7 @@ export function TranscriptionView({ locale, onDevice, autoRefine, onLocaleUsed }
         locale={locale}
         onDevice={onDevice}
         autoRefine={autoRefine}
+        aiModel={aiModel}
       />
     );
   }

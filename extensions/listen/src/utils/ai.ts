@@ -2,6 +2,7 @@ import { AI, environment, showToast, Toast } from "@raycast/api";
 
 export interface RefineTranscriptionOptions {
   transcriptionText: string;
+  model?: AIModelPreference;
   onStart?: () => void;
   onSuccess?: (refinedText: string) => void;
   onError?: (error: string) => void;
@@ -20,7 +21,7 @@ export function isAIAvailable(): boolean {
  * Returns the refined text or null if refinement failed
  */
 export async function refineTranscription(options: RefineTranscriptionOptions): Promise<string | null> {
-  const { transcriptionText, onStart, onSuccess, onError, onComplete } = options;
+  const { transcriptionText, model, onStart, onSuccess, onError, onComplete } = options;
 
   if (!transcriptionText.trim()) {
     const errorMsg = "No transcription to refine";
@@ -78,7 +79,7 @@ ${transcriptionText}
 
     const answer = await AI.ask(prompt, {
       creativity: 0.3, // Low creativity for accurate refinement
-      model: AI.Model["OpenAI_GPT5-mini"],
+      model: getAIModel(model),
     });
 
     toast.style = Toast.Style.Success;
@@ -104,6 +105,7 @@ ${transcriptionText}
 export interface TranslateTextOptions {
   text: string;
   targetLanguage: string;
+  model?: AIModelPreference;
   onStart?: () => void;
   onSuccess?: (translatedText: string) => void;
   onError?: (error: string) => void;
@@ -114,7 +116,7 @@ export interface TranslateTextOptions {
  * Translate text to a target language using AI
  */
 export async function translateText(options: TranslateTextOptions): Promise<string | null> {
-  const { text, targetLanguage, onStart, onSuccess, onError, onComplete } = options;
+  const { text, targetLanguage, model, onStart, onSuccess, onError, onComplete } = options;
 
   if (!text.trim()) {
     const errorMsg = "No text to translate";
@@ -165,7 +167,7 @@ ${text}
 
     const answer = await AI.ask(prompt, {
       creativity: 0.3,
-      model: AI.Model["OpenAI_GPT5-mini"],
+      model: getAIModel(model),
     });
 
     toast.style = Toast.Style.Success;
@@ -186,4 +188,149 @@ ${text}
   } finally {
     onComplete?.();
   }
+}
+
+export type AIModelPreference = "gemini-2.0-flash" | "gemini-2.5-flash" | "gpt5-mini" | "claude-haiku";
+
+export function getAIModel(preference?: AIModelPreference): AI.Model {
+  switch (preference) {
+    case "gemini-2.0-flash":
+      return AI.Model["Google_Gemini_2.0_Flash"];
+    case "gemini-2.5-flash":
+      return AI.Model["Google_Gemini_2.5_Flash"];
+    case "gpt5-mini":
+      return AI.Model["OpenAI_GPT5-mini"];
+    case "claude-haiku":
+      return AI.Model.Anthropic_Claude_Haiku;
+    default:
+      return AI.Model["Google_Gemini_2.0_Flash"];
+  }
+}
+
+export interface VoiceCommandOptions {
+  selectedText: string;
+  instruction: string;
+  model?: AIModelPreference;
+  onStart?: () => void;
+  onSuccess?: (result: string) => void;
+  onError?: (error: string) => void;
+  onComplete?: () => void;
+}
+
+/**
+ * Process selected text with voice instruction using AI.
+ * The AI automatically determines whether to:
+ * - Modify/transform the selected text
+ * - Answer a question about the selected text
+ * - Or perform any other operation based on the instruction
+ *
+ * The AI will first correct any speech recognition errors in the instruction,
+ * then perform the appropriate operation.
+ */
+export async function processVoiceCommand(options: VoiceCommandOptions): Promise<string | null> {
+  const { selectedText, instruction, onStart, onSuccess, onError, onComplete } = options;
+
+  if (!selectedText.trim()) {
+    const errorMsg = "No text selected";
+    await showToast({
+      style: Toast.Style.Failure,
+      title: errorMsg,
+    });
+    onError?.(errorMsg);
+    return null;
+  }
+
+  if (!instruction.trim()) {
+    const errorMsg = "No voice instruction provided";
+    await showToast({
+      style: Toast.Style.Failure,
+      title: errorMsg,
+    });
+    onError?.(errorMsg);
+    return null;
+  }
+
+  // Check if AI is available
+  if (!isAIAvailable()) {
+    const errorMsg = "Please upgrade to Raycast Pro to use AI features";
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "AI Not Available",
+      message: errorMsg,
+    });
+    onError?.(errorMsg);
+    return null;
+  }
+
+  onStart?.();
+
+  try {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Processing...",
+    });
+
+    const prompt = getUnifiedPrompt(selectedText, instruction);
+
+    const answer = await AI.ask(prompt, {
+      creativity: 0.4,
+      model: getAIModel(options.model),
+    });
+
+    toast.style = Toast.Style.Success;
+    toast.title = "Complete";
+
+    onSuccess?.(answer);
+    return answer;
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : "Unknown error";
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Processing Failed",
+      message: errorMsg,
+    });
+    onError?.(errorMsg);
+    return null;
+  } finally {
+    onComplete?.();
+  }
+}
+
+function getUnifiedPrompt(selectedText: string, instruction: string): string {
+  return `Be an intelligent assistant that processes text based on voice instructions. You will receive:
+1. A piece of SELECTED TEXT from the user
+2. A raw VOICE INSTRUCTION (speech-to-text transcription) describing what to do with it
+
+The task is to:
+1. First, interpret and correct the voice instruction - fix any speech recognition errors, typos, or unclear parts based on context
+2. Determine what the user wants:
+   - If they want to MODIFY the text (rewrite, translate, fix, format, summarize, expand, etc.) → output the modified text
+   - If they're asking a QUESTION about the text (explain, what does this mean, why, how, etc.) → answer the question
+   - If unclear, make the best interpretation based on context
+
+For TEXT MODIFICATIONS:
+* Output ONLY the final modified text
+* Preserve formatting style (code blocks, lists, etc.) unless asked to change it
+* Common modifications: rewrite, translate, change tone, fix grammar, summarize, expand, format, etc.
+
+For QUESTIONS/EXPLANATIONS:
+* Provide a clear, helpful answer
+* Use markdown formatting when it improves readability
+* Base your answer on the provided text, supplemented by your knowledge when appropriate
+* If explaining code, be clear and concise
+
+General Instructions:
+* Do NOT include labels like "Modified text:" or "Answer:" - just output the result directly
+* If the instruction cannot be reasonably interpreted, return the original text unchanged
+* Keep the output focused and relevant
+
+<selected_text>
+${selectedText}
+</selected_text>
+
+<voice_instruction>
+${instruction}
+</voice_instruction>
+
+Output:`;
 }

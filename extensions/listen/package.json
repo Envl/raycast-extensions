@@ -126,6 +126,99 @@
 					]
 				}
 			]
+		},
+		{
+			"name": "voice-command",
+			"title": "Voice Command",
+			"subtitle": "Voice-controlled text processing with AI",
+			"description": "Process selected text using voice instructions - modify, translate, answer questions, and more",
+			"mode": "view",
+			"arguments": [
+				{
+					"name": "locale",
+					"type": "dropdown",
+					"placeholder": "Language",
+					"required": false,
+					"data": [
+						{
+							"title": "English (US)",
+							"value": "en-US"
+						},
+						{
+							"title": "English (UK)",
+							"value": "en-GB"
+						},
+						{
+							"title": "English (Australia)",
+							"value": "en-AU"
+						},
+						{
+							"title": "Spanish (Spain)",
+							"value": "es-ES"
+						},
+						{
+							"title": "Spanish (Mexico)",
+							"value": "es-MX"
+						},
+						{
+							"title": "French",
+							"value": "fr-FR"
+						},
+						{
+							"title": "German",
+							"value": "de-DE"
+						},
+						{
+							"title": "Italian",
+							"value": "it-IT"
+						},
+						{
+							"title": "Japanese",
+							"value": "ja-JP"
+						},
+						{
+							"title": "Korean",
+							"value": "ko-KR"
+						},
+						{
+							"title": "Chinese (Simplified)",
+							"value": "zh-CN"
+						},
+						{
+							"title": "Chinese (Traditional)",
+							"value": "zh-TW"
+						},
+						{
+							"title": "Portuguese (Brazil)",
+							"value": "pt-BR"
+						},
+						{
+							"title": "Russian",
+							"value": "ru-RU"
+						},
+						{
+							"title": "Dutch",
+							"value": "nl-NL"
+						}
+					]
+				},
+				{
+					"name": "recognitionMode",
+					"type": "dropdown",
+					"placeholder": "Recognition Mode",
+					"required": false,
+					"data": [
+						{
+							"title": "On-Device (Private)",
+							"value": "on-device"
+						},
+						{
+							"title": "Server-Based (More Accurate)",
+							"value": "server"
+						}
+					]
+				}
+			]
 		}
 	],
 	"preferences": [
@@ -214,6 +307,32 @@
 				{
 					"title": "Dutch",
 					"value": "nl-NL"
+				}
+			]
+		},
+		{
+			"name": "aiModel",
+			"type": "dropdown",
+			"required": false,
+			"title": "AI Model",
+			"description": "Default AI model for voice commands and refinement",
+			"default": "gemini-2.0-flash",
+			"data": [
+				{
+					"title": "Gemini 2.0 Flash (Fast)",
+					"value": "gemini-2.0-flash"
+				},
+				{
+					"title": "Gemini 2.5 Flash",
+					"value": "gemini-2.5-flash"
+				},
+				{
+					"title": "GPT-5 Mini",
+					"value": "gpt5-mini"
+				},
+				{
+					"title": "Claude Haiku",
+					"value": "claude-haiku"
 				}
 			]
 		}

@@ -1,6 +1,6 @@
 import { Action, ActionPanel, AI, Clipboard, environment, Icon, List, popToRoot, showToast, Toast } from "@raycast/api";
 import { useRef, useState } from "react";
-import { refineTranscription, translateText } from "../utils/ai";
+import { type AIModelPreference, refineTranscription, translateText } from "../utils/ai";
 import { useProductionSafeMount } from "../utils/use-production-safe-mount";
 
 // MARK: - Constants
@@ -22,6 +22,15 @@ const COMMON_LANGUAGES = [
   { name: "Hindi", code: "Hindi" },
 ];
 
+const MODEL_DISPLAY_NAMES: Record<AIModelPreference, string> = {
+  "gemini-2.0-flash": "Gemini 2.0 Flash",
+  "gemini-2.5-flash": "Gemini 2.5 Flash",
+  "gpt5-mini": "GPT-5 Mini",
+  "claude-haiku": "Claude Haiku",
+};
+
+const ALL_MODELS: AIModelPreference[] = ["gemini-2.0-flash", "gemini-2.5-flash", "gpt5-mini", "claude-haiku"];
+
 // MARK: - Shared Types
 
 interface TranscriptionMetadataProps {
@@ -31,6 +40,7 @@ interface TranscriptionMetadataProps {
   charCount?: number;
   typeLabel?: string;
   sourceLabel?: string;
+  modelLabel?: string;
 }
 
 // MARK: - Shared Metadata Component
@@ -42,11 +52,13 @@ function TranscriptionMetadata({
   charCount,
   typeLabel,
   sourceLabel,
+  modelLabel,
 }: TranscriptionMetadataProps) {
   return (
     <List.Item.Detail.Metadata>
       {typeLabel && <List.Item.Detail.Metadata.Label title="Type" text={typeLabel} />}
       {sourceLabel && <List.Item.Detail.Metadata.Label title="Source" text={sourceLabel} />}
+      {modelLabel && <List.Item.Detail.Metadata.Label title="Model" text={modelLabel} />}
       <List.Item.Detail.Metadata.Separator />
       <List.Item.Detail.Metadata.Label title="Language" text={locale.toUpperCase()} />
       <List.Item.Detail.Metadata.Label title="Recognition" text={onDevice ? "On-device" : "Server-based"} />
@@ -130,9 +142,11 @@ interface RefinedTextItemProps {
   onDevice: boolean;
   wordCount: number;
   charCount: number;
+  model: AIModelPreference;
   onRefine: () => Promise<void>;
   onPaste: () => Promise<void>;
   onCopy: () => Promise<void>;
+  onChangeModel: (model: AIModelPreference) => void;
 }
 
 function RefinedTextItem({
@@ -144,9 +158,11 @@ function RefinedTextItem({
   onDevice,
   wordCount,
   charCount,
+  model,
   onRefine,
   onPaste,
   onCopy,
+  onChangeModel,
 }: RefinedTextItemProps) {
   return (
     <List.Item
@@ -164,6 +180,7 @@ function RefinedTextItem({
               wordCount={wordCount}
               charCount={charCount}
               typeLabel={isRefined ? "✨ AI Refined" : "Not refined yet"}
+              modelLabel={isRefined ? MODEL_DISPLAY_NAMES[model] : undefined}
             />
           }
         />
@@ -185,6 +202,15 @@ function RefinedTextItem({
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
                 onAction={onRefine}
               />
+              <ActionPanel.Submenu
+                title="Change Model & Refine Again"
+                icon={Icon.Switch}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+              >
+                {ALL_MODELS.filter((m) => m !== model).map((m) => (
+                  <Action key={m} title={MODEL_DISPLAY_NAMES[m]} onAction={() => onChangeModel(m)} />
+                ))}
+              </ActionPanel.Submenu>
             </>
           ) : (
             <Action title="Refine with AI" icon={Icon.Stars} onAction={onRefine} />
@@ -206,9 +232,11 @@ interface TranslateItemProps {
   isTranslated: boolean;
   locale: string;
   onDevice: boolean;
+  model: AIModelPreference;
   onTranslate: (targetLanguage: string) => void;
   onPaste: () => Promise<void>;
   onCopy: () => Promise<void>;
+  onChangeModel: (model: AIModelPreference, targetLanguage: string) => void;
 }
 
 function TranslateItem({
@@ -220,9 +248,11 @@ function TranslateItem({
   isTranslated,
   locale,
   onDevice,
+  model,
   onTranslate,
   onPaste,
   onCopy,
+  onChangeModel,
 }: TranslateItemProps) {
   return (
     <List.Item
@@ -245,6 +275,7 @@ function TranslateItem({
               onDevice={onDevice}
               typeLabel={isTranslated ? `🌐 ${translatedLanguage}` : "Not translated yet"}
               sourceLabel={refinedText ? "Refined text" : "Original text"}
+              modelLabel={isTranslated ? MODEL_DISPLAY_NAMES[model] : undefined}
             />
           }
         />
@@ -267,6 +298,19 @@ function TranslateItem({
               >
                 {COMMON_LANGUAGES.map((lang) => (
                   <Action key={lang.code} title={lang.name} onAction={() => onTranslate(lang.code)} />
+                ))}
+              </ActionPanel.Submenu>
+              <ActionPanel.Submenu
+                title="Change Model & Translate Again"
+                icon={Icon.Switch}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+              >
+                {ALL_MODELS.filter((m) => m !== model).map((m) => (
+                  <Action
+                    key={m}
+                    title={MODEL_DISPLAY_NAMES[m]}
+                    onAction={() => onChangeModel(m, translatedLanguage)}
+                  />
                 ))}
               </ActionPanel.Submenu>
             </>
@@ -319,6 +363,7 @@ export interface TranscriptionActionsListProps {
   locale: string;
   onDevice: boolean;
   autoRefine: boolean;
+  aiModel: AIModelPreference;
 }
 
 export function TranscriptionActionsList({
@@ -326,12 +371,15 @@ export function TranscriptionActionsList({
   locale,
   onDevice,
   autoRefine,
+  aiModel,
 }: TranscriptionActionsListProps) {
   const [isRefining, setIsRefining] = useState(false);
   const [refinedText, setRefinedText] = useState("");
   const [isTranslating, setIsTranslating] = useState(false);
   const [translatedText, setTranslatedText] = useState("");
   const [translatedLanguage, setTranslatedLanguage] = useState("");
+  const [currentRefineModel, setCurrentRefineModel] = useState<AIModelPreference>(aiModel);
+  const [currentTranslateModel, setCurrentTranslateModel] = useState<AIModelPreference>(aiModel);
 
   const refiningRef = useRef(false);
   const translatingRef = useRef(false);
@@ -354,6 +402,26 @@ export function TranscriptionActionsList({
     if (refiningRef.current) return;
     refineTranscription({
       transcriptionText,
+      model: currentRefineModel,
+      onStart() {
+        refiningRef.current = true;
+        setIsRefining(true);
+      },
+      onSuccess(text) {
+        setRefinedText(text);
+      },
+      onComplete() {
+        refiningRef.current = false;
+        setIsRefining(false);
+      },
+    });
+  }
+
+  function handleChangeRefineModel(newModel: AIModelPreference) {
+    setCurrentRefineModel(newModel);
+    refineTranscription({
+      transcriptionText,
+      model: newModel,
       onStart() {
         refiningRef.current = true;
         setIsRefining(true);
@@ -376,6 +444,7 @@ export function TranscriptionActionsList({
       title: "Pasted Original",
       message: "Original transcription pasted to active app",
     });
+    await popToRoot();
   }
 
   async function handleCopyOriginal() {
@@ -396,6 +465,7 @@ export function TranscriptionActionsList({
       title: "Pasted Refined",
       message: "Refined transcription pasted to active app",
     });
+    await popToRoot();
   }
 
   async function handleCopyRefined() {
@@ -414,6 +484,29 @@ export function TranscriptionActionsList({
     translateText({
       text: textToTranslate,
       targetLanguage,
+      model: currentTranslateModel,
+      onStart() {
+        translatingRef.current = true;
+        setIsTranslating(true);
+      },
+      onSuccess(translated) {
+        setTranslatedText(translated);
+        setTranslatedLanguage(targetLanguage);
+      },
+      onComplete() {
+        translatingRef.current = false;
+        setIsTranslating(false);
+      },
+    });
+  }
+
+  function handleChangeTranslateModel(newModel: AIModelPreference, targetLanguage: string) {
+    setCurrentTranslateModel(newModel);
+    const textToTranslate = refinedText || transcriptionText;
+    translateText({
+      text: textToTranslate,
+      targetLanguage,
+      model: newModel,
       onStart() {
         translatingRef.current = true;
         setIsTranslating(true);
@@ -437,6 +530,7 @@ export function TranscriptionActionsList({
       title: "Pasted Translation",
       message: `Translation (${translatedLanguage}) pasted to active app`,
     });
+    await popToRoot();
   }
 
   async function handleCopyTranslated() {
@@ -464,9 +558,11 @@ export function TranscriptionActionsList({
             onDevice={onDevice}
             wordCount={wordCount}
             charCount={charCount}
+            model={currentRefineModel}
             onRefine={handleRefineWithAI}
             onPaste={handlePasteRefined}
             onCopy={handleCopyRefined}
+            onChangeModel={handleChangeRefineModel}
           />
           <OriginalTextItem
             transcriptionText={transcriptionText}
@@ -498,9 +594,11 @@ export function TranscriptionActionsList({
             onDevice={onDevice}
             wordCount={wordCount}
             charCount={charCount}
+            model={currentRefineModel}
             onRefine={handleRefineWithAI}
             onPaste={handlePasteRefined}
             onCopy={handleCopyRefined}
+            onChangeModel={handleChangeRefineModel}
           />
         </>
       )}
@@ -514,9 +612,11 @@ export function TranscriptionActionsList({
         isTranslated={isTranslated}
         locale={locale}
         onDevice={onDevice}
+        model={currentTranslateModel}
         onTranslate={handleTranslate}
         onPaste={handlePasteTranslated}
         onCopy={handleCopyTranslated}
+        onChangeModel={handleChangeTranslateModel}
       />
 
       <DiscardItem transcriptionText={transcriptionText} locale={locale} onDevice={onDevice} />

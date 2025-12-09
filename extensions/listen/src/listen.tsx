@@ -1,6 +1,7 @@
 import { Detail, getPreferenceValues, type LaunchProps, LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { TranscriptionView } from "./components/TranscriptionView";
+import type { AIModelPreference } from "./utils/ai";
 
 interface Arguments {
   locale?: string;
@@ -11,6 +12,7 @@ interface Preferences {
   locale: string;
   onDeviceOnly: boolean;
   autoRefine: boolean;
+  aiModel: AIModelPreference;
 }
 
 const LAST_LOCALE_KEY = "lastUsedLocale";
@@ -23,6 +25,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
     ? props.arguments.recognitionMode !== "server"
     : preferences.onDeviceOnly;
   const autoRefine = preferences.autoRefine;
+  const aiModel = preferences.aiModel;
 
   // Load last used locale on mount
   useEffect(() => {
@@ -56,6 +59,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
       locale={locale}
       onDevice={onDevice}
       autoRefine={autoRefine}
+      aiModel={aiModel}
       onLocaleUsed={async (usedLocale) => {
         await LocalStorage.setItem(LAST_LOCALE_KEY, usedLocale);
       }}
