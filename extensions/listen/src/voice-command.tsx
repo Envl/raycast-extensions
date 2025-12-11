@@ -46,66 +46,40 @@ type ViewState = "recording" | "processing" | "result";
 export default function VoiceCommandCommand(props: LaunchProps<{ arguments: Arguments }>) {
   const preferences = getPreferenceValues<Preferences>();
   const [locale, setLocale] = useState<string | null>(null);
-  const [selectedText, setSelectedText] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   const onDevice = props.arguments.recognitionMode
     ? props.arguments.recognitionMode !== "server"
     : preferences.onDeviceOnly;
 
-  // Load selected text and locale on mount
+  // Load locale on mount
   useEffect(() => {
-    async function init() {
-      try {
-        const text = await getSelectedText();
-        if (!text || !text.trim()) {
-          setError("No text selected. Please select some text and try again.");
-          return;
-        }
-        setSelectedText(text);
+    initLocale();
+  }, []);
 
-        // If locale is provided via arguments, use it and save it
-        if (props.arguments.locale) {
-          setLocale(props.arguments.locale);
-          await LocalStorage.setItem(LAST_LOCALE_KEY, props.arguments.locale);
-          return;
-        }
-
-        // Try to get last used locale from storage
-        const lastLocale = await LocalStorage.getItem<string>(LAST_LOCALE_KEY);
-        if (lastLocale) {
-          setLocale(lastLocale);
-        } else {
-          // Fall back to preferences
-          setLocale(preferences.locale);
-        }
-      } catch {
-        setError("Failed to get selected text. Please select some text and try again.");
-      }
+  async function initLocale() {
+    // If locale is provided via arguments, use it and save it
+    if (props.arguments.locale) {
+      setLocale(props.arguments.locale);
+      await LocalStorage.setItem(LAST_LOCALE_KEY, props.arguments.locale);
+      return;
     }
-    init();
-  }, [props.arguments.locale, preferences.locale]);
 
-  if (error) {
-    return (
-      <Detail
-        markdown={`## ⚠️ Error\n\n${error}`}
-        actions={
-          <ActionPanel>
-            <Action title="Close" icon={Icon.XMarkCircle} onAction={() => popToRoot()} />
-          </ActionPanel>
-        }
-      />
-    );
+    // Try to get last used locale from storage
+    const lastLocale = await LocalStorage.getItem<string>(LAST_LOCALE_KEY);
+    if (lastLocale) {
+      setLocale(lastLocale);
+    } else {
+      // Fall back to preferences
+      setLocale(preferences.locale);
+    }
   }
 
-  if (!locale || !selectedText) {
+  if (!locale) {
     return <Detail isLoading markdown="Loading..." />;
   }
 
   return (
     <VoiceCommandView
-      selectedText={selectedText}
       locale={locale}
       onDevice={onDevice}
       aiModel={preferences.aiModel}
@@ -119,20 +93,21 @@ export default function VoiceCommandCommand(props: LaunchProps<{ arguments: Argu
 // MARK: - Voice Command View
 
 interface VoiceCommandViewProps {
-  selectedText: string;
   locale: string;
   onDevice: boolean;
   aiModel: AIModelPreference;
   onLocaleUsed?: (locale: string) => Promise<void>;
 }
 
-function VoiceCommandView({ selectedText, locale, onDevice, aiModel, onLocaleUsed }: VoiceCommandViewProps) {
+function VoiceCommandView({ locale, onDevice, aiModel, onLocaleUsed }: VoiceCommandViewProps) {
   const [viewState, setViewState] = useState<ViewState>("recording");
   const [transcriptionText, setTranscriptionText] = useState("");
   const [resultText, setResultText] = useState("");
   const [isMicReady, setIsMicReady] = useState(false);
   const [maybeBlinkDot, setMaybeBlinkDot] = useState("");
   const [currentModel, setCurrentModel] = useState<AIModelPreference>(aiModel);
+  const [selectedText, setSelectedText] = useState<string>("");
+  const [mounted, setMounted] = useState(false);
 
   const sessionRef = useRef<TranscriptionSession | null>(null);
   const acceptUpdatesRef = useRef(true);
@@ -162,7 +137,25 @@ function VoiceCommandView({ selectedText, locale, onDevice, aiModel, onLocaleUse
   // Start transcription on mount
   useProductionSafeMount(() => {
     startTranscriptionSession();
+    getSelectedText()
+      .then((text) => {
+        setSelectedText(text);
+      })
+      .finally(() => setMounted(true));
   }, []);
+
+  if (!selectedText && mounted) {
+    return (
+      <Detail
+        markdown={`## ⚠️ Error\n\n${"No text selected. Please select some text and try again."}`}
+        actions={
+          <ActionPanel>
+            <Action title="Close" icon={Icon.XMarkCircle} onAction={() => popToRoot()} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
 
   // MARK: Functions
 
