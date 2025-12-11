@@ -11,6 +11,7 @@ export interface StreamEvent {
   text?: string;
   message?: string;
   timestamp: number;
+  sessionId?: string;
 }
 
 export interface TranscriptionCallbacks {
@@ -39,6 +40,7 @@ export async function startTranscription(options: TranscriptionOptions): Promise
   // Get the status file path
   const statusFilePath = await getStatusFilePath();
   let lastTimestamp = 0;
+  let currentSessionId: string | null = null;
   let isRunning = true;
   let pollInterval: NodeJS.Timeout | null = null;
 
@@ -54,6 +56,16 @@ export async function startTranscription(options: TranscriptionOptions): Promise
         if (existsSync(statusFilePath)) {
           const content = readFileSync(statusFilePath, "utf-8");
           const event = JSON.parse(content) as StreamEvent;
+
+          // Capture session ID from first event (initializing)
+          if (event.type === "initializing" && event.sessionId) {
+            currentSessionId = event.sessionId;
+          }
+
+          // Ignore events from different sessions
+          if (currentSessionId && event.sessionId !== currentSessionId) {
+            return;
+          }
 
           // Only process new events
           if (event.timestamp > lastTimestamp) {
@@ -125,6 +137,10 @@ export async function startTranscription(options: TranscriptionOptions): Promise
       await swiftStopTranscription();
       isRunning = false;
       stopPolling();
+      // Wait for Swift process to detect the stop signal and terminate
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      // Clean up IPC files
+      await cleanupStatusFile();
     },
   };
 }
@@ -161,7 +177,11 @@ export async function handleStopRecording(options: StopRecordingOptions): Promis
  */
 export async function cleanupTranscription(): Promise<void> {
   try {
+    // Signal Swift to stop
     await swiftStopTranscription();
+    // Wait for Swift process to detect the stop signal and terminate
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    // Now clean up the files
     await cleanupStatusFile();
   } catch {
     // Ignore cleanup errors

@@ -305,7 +305,7 @@ The task is to:
 1. First, interpret and correct the voice instruction - fix any speech recognition errors, typos, or unclear parts based on context
 2. Determine what the user wants:
    - If they want to MODIFY the text (rewrite, translate, fix, format, summarize, expand, etc.) → output the modified text
-   - If they're asking a QUESTION about the text (explain, what does this mean, why, how, etc.) → answer the question
+   - If they're asking a QUESTION about the text (explain, what does this mean, why, how, etc.) → answer the question in a precise and concise way, sacrifice grammar for brevity
    - If unclear, make the best interpretation based on context
 
 For TEXT MODIFICATIONS:

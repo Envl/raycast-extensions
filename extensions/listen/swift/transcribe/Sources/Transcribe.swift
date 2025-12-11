@@ -8,15 +8,19 @@ import Speech
 class TranscriptionIPC {
     let statusFile: URL
     let stopFile: URL
+    let sessionId: String
 
     init() {
         let tempDir = FileManager.default.temporaryDirectory
         statusFile = tempDir.appendingPathComponent("raycast-listen-status.json")
         stopFile = tempDir.appendingPathComponent("raycast-listen-stop")
+        sessionId = UUID().uuidString
     }
 
     func writeStatus(_ dict: [String: Any]) {
-        if let jsonData = try? JSONSerialization.data(withJSONObject: dict, options: [.prettyPrinted]) {
+        var statusDict = dict
+        statusDict["sessionId"] = sessionId
+        if let jsonData = try? JSONSerialization.data(withJSONObject: statusDict, options: [.prettyPrinted]) {
             try? jsonData.write(to: statusFile)
         }
     }
@@ -268,7 +272,13 @@ class SpeechRecognizer: NSObject {
 @raycast func stopTranscription() {
     let tempDir = FileManager.default.temporaryDirectory
     let stopFile = tempDir.appendingPathComponent("raycast-listen-stop")
-    FileManager.default.createFile(atPath: stopFile.path, contents: nil, attributes: nil)
+    // Create the stop file to signal the transcription to stop
+    // Use write to ensure file is created even if createFile fails
+    do {
+        try Data().write(to: stopFile)
+    } catch {
+        FileManager.default.createFile(atPath: stopFile.path, contents: Data(), attributes: nil)
+    }
 }
 
 /// Get the path to the status file for watching

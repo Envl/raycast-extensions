@@ -1,0 +1,17 @@
+export const LOCALE_OPTIONS: { title: string; value: string }[] = [
+  { title: "English (US)", value: "en-US" },
+  { title: "English (UK)", value: "en-GB" },
+  { title: "English (Australia)", value: "en-AU" },
+  { title: "Spanish (Spain)", value: "es-ES" },
+  { title: "Spanish (Mexico)", value: "es-MX" },
+  { title: "French", value: "fr-FR" },
+  { title: "German", value: "de-DE" },
+  { title: "Italian", value: "it-IT" },
+  { title: "Japanese", value: "ja-JP" },
+  { title: "Korean", value: "ko-KR" },
+  { title: "Chinese (Simplified)", value: "zh-CN" },
+  { title: "Chinese (Traditional)", value: "zh-TW" },
+  { title: "Portuguese (Brazil)", value: "pt-BR" },
+  { title: "Russian", value: "ru-RU" },
+  { title: "Dutch", value: "nl-NL" },
+];

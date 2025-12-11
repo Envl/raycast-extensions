@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Detail, Icon, showToast, Toast } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import type { AIModelPreference } from "../utils/ai";
+import { LOCALE_OPTIONS } from "../utils/locales";
 import {
   cleanupTranscription,
   handleStopRecording,
@@ -22,6 +23,7 @@ export function TranscriptionView({ locale, onDevice, autoRefine, aiModel, onLoc
   const [transcriptionText, setTranscriptionText] = useState("");
   const [isRecording, setIsRecording] = useState(true);
   const [isMicReady, setIsMicReady] = useState(false);
+  const [currentLocale, setCurrentLocale] = useState<string>(locale);
   const sessionRef = useRef<TranscriptionSession | null>(null);
   const [showActionsList, setShowActionsList] = useState(false);
   const [maybeBlinkDot, setMaybeBlinkDot] = useState("");
@@ -57,12 +59,13 @@ export function TranscriptionView({ locale, onDevice, autoRefine, aiModel, onLoc
 
   // MARK: Functions
 
-  async function startTranscriptionSession() {
+  async function startTranscriptionSession(localeToUse?: string) {
+    const effectiveLocale = localeToUse || currentLocale;
     // Save the locale as last used
-    await onLocaleUsed?.(locale);
+    await onLocaleUsed?.(effectiveLocale);
 
     const session = await startTranscription({
-      locale,
+      locale: effectiveLocale,
       onDevice,
       callbacks: {
         onRecordingStarted: () => {
@@ -90,6 +93,28 @@ export function TranscriptionView({ locale, onDevice, autoRefine, aiModel, onLoc
     sessionRef.current = session;
   }
 
+  async function changeLanguage(newLocale: string) {
+    if (newLocale === currentLocale) return;
+
+    // Stop current transcription
+    if (sessionRef.current) {
+      await sessionRef.current.stop();
+      sessionRef.current = null;
+    }
+
+    // Ensure cleanup before starting new session
+    await cleanupTranscription();
+
+    // Reset state for new recording
+    setCurrentLocale(newLocale);
+    setTranscriptionText("");
+    setIsMicReady(false);
+    acceptUpdatesRef.current = true;
+
+    // Start new transcription with new locale
+    await startTranscriptionSession(newLocale);
+  }
+
   async function stopRecording() {
     // Stop accepting any further updates
     acceptUpdatesRef.current = false;
@@ -101,6 +126,10 @@ export function TranscriptionView({ locale, onDevice, autoRefine, aiModel, onLoc
       onStop: () => setIsRecording(false),
       onShowActions: () => setShowActionsList(true),
     });
+
+    // Ensure session is cleaned up
+    sessionRef.current = null;
+    await cleanupTranscription();
   }
 
   // MARK: Rendering
@@ -110,7 +139,7 @@ export function TranscriptionView({ locale, onDevice, autoRefine, aiModel, onLoc
     return (
       <TranscriptionActionsList
         transcriptionText={transcriptionText}
-        locale={locale}
+        locale={currentLocale}
         onDevice={onDevice}
         autoRefine={autoRefine}
         aiModel={aiModel}
@@ -130,7 +159,7 @@ export function TranscriptionView({ locale, onDevice, autoRefine, aiModel, onLoc
     <Detail.Metadata>
       <Detail.Metadata.Label title="Status" text={statusIndicator} />
       <Detail.Metadata.Separator />
-      <Detail.Metadata.Label title="Language" text={locale.toUpperCase()} />
+      <Detail.Metadata.Label title="Language" text={currentLocale.toUpperCase()} />
       <Detail.Metadata.Label title="Recognition" text={onDevice ? "On-device" : "Server-based"} />
       <Detail.Metadata.Separator />
       <Detail.Metadata.Label title="Words" text={wordCount.toString()} />
@@ -146,6 +175,18 @@ export function TranscriptionView({ locale, onDevice, autoRefine, aiModel, onLoc
       actions={
         <ActionPanel>
           {isRecording && <Action title="Stop Recording" icon={Icon.Stop} onAction={stopRecording} />}
+          {isRecording && (
+            <ActionPanel.Submenu title="Change Language" icon={Icon.Globe} shortcut={{ modifiers: ["cmd"], key: "l" }}>
+              {LOCALE_OPTIONS.map((option) => (
+                <Action
+                  key={option.value}
+                  title={option.title}
+                  icon={option.value === currentLocale ? Icon.Checkmark : Icon.Circle}
+                  onAction={() => changeLanguage(option.value)}
+                />
+              ))}
+            </ActionPanel.Submenu>
+          )}
         </ActionPanel>
       }
     />
