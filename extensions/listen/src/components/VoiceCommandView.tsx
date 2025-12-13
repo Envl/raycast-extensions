@@ -68,6 +68,13 @@ export function VoiceCommandView({ locale, onDevice, aiModel, onLocaleUsed }: Vo
     };
   }, [viewState]);
 
+  // If we have transcription text, mic must be ready - this is the most reliable indicator
+  useEffect(() => {
+    if (transcriptionText && !isMicReady) {
+      setIsMicReady(true);
+    }
+  }, [transcriptionText, isMicReady]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -133,6 +140,15 @@ export function VoiceCommandView({ locale, onDevice, aiModel, onLocaleUsed }: Vo
     });
 
     sessionRef.current = session;
+
+    // Fallback: if mic ready signal wasn't received within 500ms, assume it's ready
+    // This handles cases where the file-based IPC signal is missed
+    setTimeout(() => {
+      // Only set if session is still active
+      if (sessionRef.current === session) {
+        setIsMicReady(true);
+      }
+    }, 500);
   }
 
   async function changeLanguage(newLocale: string) {

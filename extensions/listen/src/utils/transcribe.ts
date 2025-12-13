@@ -5,6 +5,7 @@ import {
   stopTranscription as swiftStopTranscription,
 } from "swift:../../swift/transcribe";
 import { existsSync, readFileSync } from "fs";
+import { dirname, join } from "path";
 
 export interface StreamEvent {
   type: "initializing" | "recording_started" | "partial" | "completed" | "error";
@@ -37,46 +38,70 @@ export interface TranscriptionSession {
 export async function startTranscription(options: TranscriptionOptions): Promise<TranscriptionSession> {
   const { locale, onDevice, callbacks } = options;
 
-  // Get the status file path
+  // Get file paths - derive mic ready path from status file path (same temp directory)
   const statusFilePath = await getStatusFilePath();
+  const micReadyFilePath = join(dirname(statusFilePath), "raycast-listen-mic-ready");
   let lastTimestamp = 0;
   let currentSessionId: string | null = null;
   let isRunning = true;
   let pollInterval: NodeJS.Timeout | null = null;
+  let recordingStartedCalled = false;
 
   // Clean up any existing status file
   await cleanupStatusFile();
 
   // Start watching the status file for changes
   const startWatching = () => {
+    let lastEventType = "";
+
     const checkFile = () => {
       if (!isRunning) return;
+
+      // Check for mic ready file - this is the reliable way to detect mic ready
+      if (!recordingStartedCalled && existsSync(micReadyFilePath)) {
+        recordingStartedCalled = true;
+        callbacks?.onRecordingStarted?.();
+      }
 
       try {
         if (existsSync(statusFilePath)) {
           const content = readFileSync(statusFilePath, "utf-8");
           const event = JSON.parse(content) as StreamEvent;
 
-          // Capture session ID from first event (initializing)
-          if (event.type === "initializing" && event.sessionId) {
+          // Capture session ID from any event that has it
+          if (event.sessionId && !currentSessionId) {
             currentSessionId = event.sessionId;
           }
 
-          // Ignore events from different sessions
-          if (currentSessionId && event.sessionId !== currentSessionId) {
+          // Ignore events from different sessions (only if we have a session ID set)
+          if (currentSessionId && event.sessionId && event.sessionId !== currentSessionId) {
             return;
           }
 
-          // Only process new events
-          if (event.timestamp > lastTimestamp) {
+          // Process new events based on timestamp OR event type change
+          // This handles cases where timestamps might be very close
+          const isNewEvent =
+            event.timestamp > lastTimestamp || (event.timestamp === lastTimestamp && event.type !== lastEventType);
+
+          if (isNewEvent) {
             lastTimestamp = event.timestamp;
+            lastEventType = event.type;
 
             switch (event.type) {
               case "recording_started":
-                callbacks?.onRecordingStarted?.();
+                if (!recordingStartedCalled) {
+                  recordingStartedCalled = true;
+                  callbacks?.onRecordingStarted?.();
+                }
                 break;
 
               case "partial":
+                // If we receive partial results, the mic is definitely ready
+                // This handles the case where recording_started event was missed
+                if (!recordingStartedCalled) {
+                  recordingStartedCalled = true;
+                  callbacks?.onRecordingStarted?.();
+                }
                 if (event.text) {
                   callbacks?.onPartialResult?.(event.text);
                 }
@@ -100,6 +125,8 @@ export async function startTranscription(options: TranscriptionOptions): Promise
     };
 
     // Poll the file every 100ms for changes
+    // Call checkFile immediately, then start interval
+    checkFile();
     pollInterval = setInterval(() => {
       if (!isRunning) {
         if (pollInterval) clearInterval(pollInterval);

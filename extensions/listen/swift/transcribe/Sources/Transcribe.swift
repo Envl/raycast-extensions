@@ -8,12 +8,14 @@ import Speech
 class TranscriptionIPC {
     let statusFile: URL
     let stopFile: URL
+    let micReadyFile: URL
     let sessionId: String
 
     init() {
         let tempDir = FileManager.default.temporaryDirectory
         statusFile = tempDir.appendingPathComponent("raycast-listen-status.json")
         stopFile = tempDir.appendingPathComponent("raycast-listen-stop")
+        micReadyFile = tempDir.appendingPathComponent("raycast-listen-mic-ready")
         sessionId = UUID().uuidString
     }
 
@@ -29,9 +31,15 @@ class TranscriptionIPC {
         return FileManager.default.fileExists(atPath: stopFile.path)
     }
 
+    func markMicReady() {
+        // Create a file to signal mic is ready - this persists until cleanup
+        try? Data().write(to: micReadyFile)
+    }
+
     func cleanup() {
         try? FileManager.default.removeItem(at: statusFile)
         try? FileManager.default.removeItem(at: stopFile)
+        try? FileManager.default.removeItem(at: micReadyFile)
     }
 
     func clearStopSignal() {
@@ -108,6 +116,8 @@ class SpeechRecognizer: NSObject {
         audioEngine.prepare()
         try audioEngine.start()
 
+        // Mark mic as ready using dedicated file (reliable signaling)
+        ipc.markMicReady()
         writeUpdate(type: "recording_started")
 
         recognitionTask = speechRecognizer.recognitionTask(with: request) { [weak self] result, error in
@@ -287,11 +297,19 @@ class SpeechRecognizer: NSObject {
     return tempDir.appendingPathComponent("raycast-listen-status.json").path
 }
 
+/// Get the path to the mic ready file
+@raycast func getMicReadyFilePath() -> String {
+    let tempDir = FileManager.default.temporaryDirectory
+    return tempDir.appendingPathComponent("raycast-listen-mic-ready").path
+}
+
 /// Clean up the status file
 @raycast func cleanupStatusFile() {
     let tempDir = FileManager.default.temporaryDirectory
     let statusFile = tempDir.appendingPathComponent("raycast-listen-status.json")
     let stopFile = tempDir.appendingPathComponent("raycast-listen-stop")
+    let micReadyFile = tempDir.appendingPathComponent("raycast-listen-mic-ready")
     try? FileManager.default.removeItem(at: statusFile)
     try? FileManager.default.removeItem(at: stopFile)
+    try? FileManager.default.removeItem(at: micReadyFile)
 }
