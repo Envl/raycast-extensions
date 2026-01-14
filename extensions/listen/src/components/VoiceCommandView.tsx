@@ -20,11 +20,11 @@ import { useProductionSafeMount } from "../utils/use-production-safe-mount";
 const MODEL_DISPLAY_NAMES: Record<AIModelPreference, string> = {
   "gemini-2.0-flash": "Gemini 2.0 Flash",
   "gemini-2.5-flash": "Gemini 2.5 Flash",
-  "gpt5-mini": "GPT-5 Mini",
-  "claude-haiku": "Claude Haiku",
+  "gpt5.1-instant": "GPT-5.1 Instant",
+  "claude-4.5-haiku": "Claude 4.5 Haiku",
 };
 
-const ALL_MODELS: AIModelPreference[] = ["gemini-2.0-flash", "gemini-2.5-flash", "gpt5-mini", "claude-haiku"];
+const ALL_MODELS: AIModelPreference[] = ["gemini-2.0-flash", "gemini-2.5-flash", "gpt5.1-instant", "claude-4.5-haiku"];
 
 type ViewState = "recording" | "processing" | "result";
 

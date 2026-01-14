@@ -14,7 +14,7 @@
 	],
 	"license": "MIT",
 	"dependencies": {
-		"@raycast/api": "^1.103.6",
+		"@raycast/api": "^1.104.1",
 		"@raycast/utils": "^1.17.0"
 	},
 	"devDependencies": {
@@ -48,64 +48,256 @@
 					"required": false,
 					"data": [
 						{
-							"title": "English (US)",
-							"value": "en-US"
+							"title": "Arabic (Saudi Arabia)",
+							"value": "ar-SA"
 						},
 						{
-							"title": "English (UK)",
-							"value": "en-GB"
+							"title": "Arabic (United Arab Emirates)",
+							"value": "ar-AE"
+						},
+						{
+							"title": "Cantonese (China mainland)",
+							"value": "yue-CN"
+						},
+						{
+							"title": "Cantonese (Hong Kong)",
+							"value": "zh-HK"
+						},
+						{
+							"title": "Catalan (Spain)",
+							"value": "ca-ES"
+						},
+						{
+							"title": "Croatian (Croatia)",
+							"value": "hr-HR"
+						},
+						{
+							"title": "Czech (Czechia)",
+							"value": "cs-CZ"
+						},
+						{
+							"title": "Danish (Denmark)",
+							"value": "da-DK"
+						},
+						{
+							"title": "Dutch (Belgium)",
+							"value": "nl-BE"
+						},
+						{
+							"title": "Dutch (Netherlands)",
+							"value": "nl-NL"
 						},
 						{
 							"title": "English (Australia)",
 							"value": "en-AU"
 						},
 						{
-							"title": "Spanish (Spain)",
-							"value": "es-ES"
+							"title": "English (Canada)",
+							"value": "en-CA"
 						},
 						{
-							"title": "Spanish (Mexico)",
-							"value": "es-MX"
+							"title": "English (India)",
+							"value": "en-IN"
 						},
 						{
-							"title": "French",
+							"title": "English (Indonesia)",
+							"value": "en-ID"
+						},
+						{
+							"title": "English (Ireland)",
+							"value": "en-IE"
+						},
+						{
+							"title": "English (Japan)",
+							"value": "en-JP"
+						},
+						{
+							"title": "English (Malaysia)",
+							"value": "en-MY"
+						},
+						{
+							"title": "English (New Zealand)",
+							"value": "en-NZ"
+						},
+						{
+							"title": "English (Philippines)",
+							"value": "en-PH"
+						},
+						{
+							"title": "English (Saudi Arabia)",
+							"value": "en-SA"
+						},
+						{
+							"title": "English (Singapore)",
+							"value": "en-SG"
+						},
+						{
+							"title": "English (South Africa)",
+							"value": "en-ZA"
+						},
+						{
+							"title": "English (United Arab Emirates)",
+							"value": "en-AE"
+						},
+						{
+							"title": "English (United Kingdom)",
+							"value": "en-GB"
+						},
+						{
+							"title": "English (United States)",
+							"value": "en-US"
+						},
+						{
+							"title": "Finnish (Finland)",
+							"value": "fi-FI"
+						},
+						{
+							"title": "French (Belgium)",
+							"value": "fr-BE"
+						},
+						{
+							"title": "French (Canada)",
+							"value": "fr-CA"
+						},
+						{
+							"title": "French (France)",
 							"value": "fr-FR"
 						},
 						{
-							"title": "German",
+							"title": "French (Switzerland)",
+							"value": "fr-CH"
+						},
+						{
+							"title": "German (Austria)",
+							"value": "de-AT"
+						},
+						{
+							"title": "German (Germany)",
 							"value": "de-DE"
 						},
 						{
-							"title": "Italian",
+							"title": "German (Switzerland)",
+							"value": "de-CH"
+						},
+						{
+							"title": "Greek (Greece)",
+							"value": "el-GR"
+						},
+						{
+							"title": "Hebrew (Israel)",
+							"value": "he-IL"
+						},
+						{
+							"title": "Hindi (India)",
+							"value": "hi-IN"
+						},
+						{
+							"title": "Hungarian (Hungary)",
+							"value": "hu-HU"
+						},
+						{
+							"title": "Indonesian",
+							"value": "id-ID"
+						},
+						{
+							"title": "Italian (Italy)",
 							"value": "it-IT"
 						},
 						{
-							"title": "Japanese",
+							"title": "Italian (Switzerland)",
+							"value": "it-CH"
+						},
+						{
+							"title": "Japanese (Japan)",
 							"value": "ja-JP"
 						},
 						{
-							"title": "Korean",
+							"title": "Korean (Korea)",
 							"value": "ko-KR"
 						},
 						{
-							"title": "Chinese (Simplified)",
+							"title": "Malay (Malaysia)",
+							"value": "ms-MY"
+						},
+						{
+							"title": "Mandarin (China Mainland)",
 							"value": "zh-CN"
 						},
 						{
-							"title": "Chinese (Traditional)",
+							"title": "Mandarin (Taiwan)",
 							"value": "zh-TW"
+						},
+						{
+							"title": "Norwegian (Bokmål)",
+							"value": "nb-NO"
+						},
+						{
+							"title": "Polish (Poland)",
+							"value": "pl-PL"
 						},
 						{
 							"title": "Portuguese (Brazil)",
 							"value": "pt-BR"
 						},
 						{
-							"title": "Russian",
+							"title": "Portuguese (Portugal)",
+							"value": "pt-PT"
+						},
+						{
+							"title": "Romanian (Romania)",
+							"value": "ro-RO"
+						},
+						{
+							"title": "Russian (Russia)",
 							"value": "ru-RU"
 						},
 						{
-							"title": "Dutch",
-							"value": "nl-NL"
+							"title": "Slovak (Slovakia)",
+							"value": "sk-SK"
+						},
+						{
+							"title": "Shanghainese",
+							"value": "wuu-CN"
+						},
+						{
+							"title": "Spanish (Chile)",
+							"value": "es-CL"
+						},
+						{
+							"title": "Spanish (Colombia)",
+							"value": "es-CO"
+						},
+						{
+							"title": "Spanish (Mexico)",
+							"value": "es-MX"
+						},
+						{
+							"title": "Spanish (Spain)",
+							"value": "es-ES"
+						},
+						{
+							"title": "Spanish (United States)",
+							"value": "es-US"
+						},
+						{
+							"title": "Swedish (Sweden)",
+							"value": "sv-SE"
+						},
+						{
+							"title": "Thai (Thailand)",
+							"value": "th-TH"
+						},
+						{
+							"title": "Turkish (Türkiye)",
+							"value": "tr-TR"
+						},
+						{
+							"title": "Ukrainian (Ukraine)",
+							"value": "uk-UA"
+						},
+						{
+							"title": "Vietnamese (Vietnam)",
+							"value": "vi-VN"
 						}
 					]
 				},
@@ -141,64 +333,256 @@
 					"required": false,
 					"data": [
 						{
-							"title": "English (US)",
-							"value": "en-US"
+							"title": "Arabic (Saudi Arabia)",
+							"value": "ar-SA"
 						},
 						{
-							"title": "English (UK)",
-							"value": "en-GB"
+							"title": "Arabic (United Arab Emirates)",
+							"value": "ar-AE"
+						},
+						{
+							"title": "Cantonese (China mainland)",
+							"value": "yue-CN"
+						},
+						{
+							"title": "Cantonese (Hong Kong)",
+							"value": "zh-HK"
+						},
+						{
+							"title": "Catalan (Spain)",
+							"value": "ca-ES"
+						},
+						{
+							"title": "Croatian (Croatia)",
+							"value": "hr-HR"
+						},
+						{
+							"title": "Czech (Czechia)",
+							"value": "cs-CZ"
+						},
+						{
+							"title": "Danish (Denmark)",
+							"value": "da-DK"
+						},
+						{
+							"title": "Dutch (Belgium)",
+							"value": "nl-BE"
+						},
+						{
+							"title": "Dutch (Netherlands)",
+							"value": "nl-NL"
 						},
 						{
 							"title": "English (Australia)",
 							"value": "en-AU"
 						},
 						{
-							"title": "Spanish (Spain)",
-							"value": "es-ES"
+							"title": "English (Canada)",
+							"value": "en-CA"
 						},
 						{
-							"title": "Spanish (Mexico)",
-							"value": "es-MX"
+							"title": "English (India)",
+							"value": "en-IN"
 						},
 						{
-							"title": "French",
+							"title": "English (Indonesia)",
+							"value": "en-ID"
+						},
+						{
+							"title": "English (Ireland)",
+							"value": "en-IE"
+						},
+						{
+							"title": "English (Japan)",
+							"value": "en-JP"
+						},
+						{
+							"title": "English (Malaysia)",
+							"value": "en-MY"
+						},
+						{
+							"title": "English (New Zealand)",
+							"value": "en-NZ"
+						},
+						{
+							"title": "English (Philippines)",
+							"value": "en-PH"
+						},
+						{
+							"title": "English (Saudi Arabia)",
+							"value": "en-SA"
+						},
+						{
+							"title": "English (Singapore)",
+							"value": "en-SG"
+						},
+						{
+							"title": "English (South Africa)",
+							"value": "en-ZA"
+						},
+						{
+							"title": "English (United Arab Emirates)",
+							"value": "en-AE"
+						},
+						{
+							"title": "English (United Kingdom)",
+							"value": "en-GB"
+						},
+						{
+							"title": "English (United States)",
+							"value": "en-US"
+						},
+						{
+							"title": "Finnish (Finland)",
+							"value": "fi-FI"
+						},
+						{
+							"title": "French (Belgium)",
+							"value": "fr-BE"
+						},
+						{
+							"title": "French (Canada)",
+							"value": "fr-CA"
+						},
+						{
+							"title": "French (France)",
 							"value": "fr-FR"
 						},
 						{
-							"title": "German",
+							"title": "French (Switzerland)",
+							"value": "fr-CH"
+						},
+						{
+							"title": "German (Austria)",
+							"value": "de-AT"
+						},
+						{
+							"title": "German (Germany)",
 							"value": "de-DE"
 						},
 						{
-							"title": "Italian",
+							"title": "German (Switzerland)",
+							"value": "de-CH"
+						},
+						{
+							"title": "Greek (Greece)",
+							"value": "el-GR"
+						},
+						{
+							"title": "Hebrew (Israel)",
+							"value": "he-IL"
+						},
+						{
+							"title": "Hindi (India)",
+							"value": "hi-IN"
+						},
+						{
+							"title": "Hungarian (Hungary)",
+							"value": "hu-HU"
+						},
+						{
+							"title": "Indonesian",
+							"value": "id-ID"
+						},
+						{
+							"title": "Italian (Italy)",
 							"value": "it-IT"
 						},
 						{
-							"title": "Japanese",
+							"title": "Italian (Switzerland)",
+							"value": "it-CH"
+						},
+						{
+							"title": "Japanese (Japan)",
 							"value": "ja-JP"
 						},
 						{
-							"title": "Korean",
+							"title": "Korean (Korea)",
 							"value": "ko-KR"
 						},
 						{
-							"title": "Chinese (Simplified)",
+							"title": "Malay (Malaysia)",
+							"value": "ms-MY"
+						},
+						{
+							"title": "Mandarin (China Mainland)",
 							"value": "zh-CN"
 						},
 						{
-							"title": "Chinese (Traditional)",
+							"title": "Mandarin (Taiwan)",
 							"value": "zh-TW"
+						},
+						{
+							"title": "Norwegian (Bokmål)",
+							"value": "nb-NO"
+						},
+						{
+							"title": "Polish (Poland)",
+							"value": "pl-PL"
 						},
 						{
 							"title": "Portuguese (Brazil)",
 							"value": "pt-BR"
 						},
 						{
-							"title": "Russian",
+							"title": "Portuguese (Portugal)",
+							"value": "pt-PT"
+						},
+						{
+							"title": "Romanian (Romania)",
+							"value": "ro-RO"
+						},
+						{
+							"title": "Russian (Russia)",
 							"value": "ru-RU"
 						},
 						{
-							"title": "Dutch",
-							"value": "nl-NL"
+							"title": "Slovak (Slovakia)",
+							"value": "sk-SK"
+						},
+						{
+							"title": "Shanghainese",
+							"value": "wuu-CN"
+						},
+						{
+							"title": "Spanish (Chile)",
+							"value": "es-CL"
+						},
+						{
+							"title": "Spanish (Colombia)",
+							"value": "es-CO"
+						},
+						{
+							"title": "Spanish (Mexico)",
+							"value": "es-MX"
+						},
+						{
+							"title": "Spanish (Spain)",
+							"value": "es-ES"
+						},
+						{
+							"title": "Spanish (United States)",
+							"value": "es-US"
+						},
+						{
+							"title": "Swedish (Sweden)",
+							"value": "sv-SE"
+						},
+						{
+							"title": "Thai (Thailand)",
+							"value": "th-TH"
+						},
+						{
+							"title": "Turkish (Türkiye)",
+							"value": "tr-TR"
+						},
+						{
+							"title": "Ukrainian (Ukraine)",
+							"value": "uk-UA"
+						},
+						{
+							"title": "Vietnamese (Vietnam)",
+							"value": "vi-VN"
 						}
 					]
 				},
@@ -249,64 +633,256 @@
 			"default": "en-US",
 			"data": [
 				{
-					"title": "English (US)",
-					"value": "en-US"
+					"title": "Arabic (Saudi Arabia)",
+					"value": "ar-SA"
 				},
 				{
-					"title": "English (UK)",
-					"value": "en-GB"
+					"title": "Arabic (United Arab Emirates)",
+					"value": "ar-AE"
+				},
+				{
+					"title": "Cantonese (China mainland)",
+					"value": "yue-CN"
+				},
+				{
+					"title": "Cantonese (Hong Kong)",
+					"value": "zh-HK"
+				},
+				{
+					"title": "Catalan (Spain)",
+					"value": "ca-ES"
+				},
+				{
+					"title": "Croatian (Croatia)",
+					"value": "hr-HR"
+				},
+				{
+					"title": "Czech (Czechia)",
+					"value": "cs-CZ"
+				},
+				{
+					"title": "Danish (Denmark)",
+					"value": "da-DK"
+				},
+				{
+					"title": "Dutch (Belgium)",
+					"value": "nl-BE"
+				},
+				{
+					"title": "Dutch (Netherlands)",
+					"value": "nl-NL"
 				},
 				{
 					"title": "English (Australia)",
 					"value": "en-AU"
 				},
 				{
-					"title": "Spanish (Spain)",
-					"value": "es-ES"
+					"title": "English (Canada)",
+					"value": "en-CA"
 				},
 				{
-					"title": "Spanish (Mexico)",
-					"value": "es-MX"
+					"title": "English (India)",
+					"value": "en-IN"
 				},
 				{
-					"title": "French",
+					"title": "English (Indonesia)",
+					"value": "en-ID"
+				},
+				{
+					"title": "English (Ireland)",
+					"value": "en-IE"
+				},
+				{
+					"title": "English (Japan)",
+					"value": "en-JP"
+				},
+				{
+					"title": "English (Malaysia)",
+					"value": "en-MY"
+				},
+				{
+					"title": "English (New Zealand)",
+					"value": "en-NZ"
+				},
+				{
+					"title": "English (Philippines)",
+					"value": "en-PH"
+				},
+				{
+					"title": "English (Saudi Arabia)",
+					"value": "en-SA"
+				},
+				{
+					"title": "English (Singapore)",
+					"value": "en-SG"
+				},
+				{
+					"title": "English (South Africa)",
+					"value": "en-ZA"
+				},
+				{
+					"title": "English (United Arab Emirates)",
+					"value": "en-AE"
+				},
+				{
+					"title": "English (United Kingdom)",
+					"value": "en-GB"
+				},
+				{
+					"title": "English (United States)",
+					"value": "en-US"
+				},
+				{
+					"title": "Finnish (Finland)",
+					"value": "fi-FI"
+				},
+				{
+					"title": "French (Belgium)",
+					"value": "fr-BE"
+				},
+				{
+					"title": "French (Canada)",
+					"value": "fr-CA"
+				},
+				{
+					"title": "French (France)",
 					"value": "fr-FR"
 				},
 				{
-					"title": "German",
+					"title": "French (Switzerland)",
+					"value": "fr-CH"
+				},
+				{
+					"title": "German (Austria)",
+					"value": "de-AT"
+				},
+				{
+					"title": "German (Germany)",
 					"value": "de-DE"
 				},
 				{
-					"title": "Italian",
+					"title": "German (Switzerland)",
+					"value": "de-CH"
+				},
+				{
+					"title": "Greek (Greece)",
+					"value": "el-GR"
+				},
+				{
+					"title": "Hebrew (Israel)",
+					"value": "he-IL"
+				},
+				{
+					"title": "Hindi (India)",
+					"value": "hi-IN"
+				},
+				{
+					"title": "Hungarian (Hungary)",
+					"value": "hu-HU"
+				},
+				{
+					"title": "Indonesian",
+					"value": "id-ID"
+				},
+				{
+					"title": "Italian (Italy)",
 					"value": "it-IT"
 				},
 				{
-					"title": "Japanese",
+					"title": "Italian (Switzerland)",
+					"value": "it-CH"
+				},
+				{
+					"title": "Japanese (Japan)",
 					"value": "ja-JP"
 				},
 				{
-					"title": "Korean",
+					"title": "Korean (Korea)",
 					"value": "ko-KR"
 				},
 				{
-					"title": "Chinese (Simplified)",
+					"title": "Malay (Malaysia)",
+					"value": "ms-MY"
+				},
+				{
+					"title": "Mandarin (China Mainland)",
 					"value": "zh-CN"
 				},
 				{
-					"title": "Chinese (Traditional)",
+					"title": "Mandarin (Taiwan)",
 					"value": "zh-TW"
+				},
+				{
+					"title": "Norwegian (Bokmål)",
+					"value": "nb-NO"
+				},
+				{
+					"title": "Polish (Poland)",
+					"value": "pl-PL"
 				},
 				{
 					"title": "Portuguese (Brazil)",
 					"value": "pt-BR"
 				},
 				{
-					"title": "Russian",
+					"title": "Portuguese (Portugal)",
+					"value": "pt-PT"
+				},
+				{
+					"title": "Romanian (Romania)",
+					"value": "ro-RO"
+				},
+				{
+					"title": "Russian (Russia)",
 					"value": "ru-RU"
 				},
 				{
-					"title": "Dutch",
-					"value": "nl-NL"
+					"title": "Slovak (Slovakia)",
+					"value": "sk-SK"
+				},
+				{
+					"title": "Shanghainese",
+					"value": "wuu-CN"
+				},
+				{
+					"title": "Spanish (Chile)",
+					"value": "es-CL"
+				},
+				{
+					"title": "Spanish (Colombia)",
+					"value": "es-CO"
+				},
+				{
+					"title": "Spanish (Mexico)",
+					"value": "es-MX"
+				},
+				{
+					"title": "Spanish (Spain)",
+					"value": "es-ES"
+				},
+				{
+					"title": "Spanish (United States)",
+					"value": "es-US"
+				},
+				{
+					"title": "Swedish (Sweden)",
+					"value": "sv-SE"
+				},
+				{
+					"title": "Thai (Thailand)",
+					"value": "th-TH"
+				},
+				{
+					"title": "Turkish (Türkiye)",
+					"value": "tr-TR"
+				},
+				{
+					"title": "Ukrainian (Ukraine)",
+					"value": "uk-UA"
+				},
+				{
+					"title": "Vietnamese (Vietnam)",
+					"value": "vi-VN"
 				}
 			]
 		},
@@ -316,7 +892,7 @@
 			"required": false,
 			"title": "AI Model",
 			"description": "Default AI model for voice commands and refinement",
-			"default": "gemini-2.0-flash",
+			"default": "claude-4.5-haiku",
 			"data": [
 				{
 					"title": "Gemini 2.0 Flash (Fast)",
@@ -327,12 +903,12 @@
 					"value": "gemini-2.5-flash"
 				},
 				{
-					"title": "GPT-5 Mini",
-					"value": "gpt5-mini"
+					"title": "GPT-5.1 Instant",
+					"value": "gpt5.1-instant"
 				},
 				{
-					"title": "Claude Haiku",
-					"value": "claude-haiku"
+					"title": "Claude 4.5 Haiku",
+					"value": "claude-4.5-haiku"
 				}
 			]
 		}

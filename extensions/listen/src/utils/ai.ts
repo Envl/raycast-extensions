@@ -190,21 +190,17 @@ ${text}
   }
 }
 
-export type AIModelPreference = "gemini-2.0-flash" | "gemini-2.5-flash" | "gpt5-mini" | "claude-haiku";
+export type AIModelPreference = "gemini-2.0-flash" | "gemini-2.5-flash" | "gpt5.1-instant" | "claude-4.5-haiku";
+
+const MODEL_MAP: Record<AIModelPreference, AI.Model> = {
+  "gemini-2.0-flash": AI.Model["Google_Gemini_2.0_Flash"],
+  "gemini-2.5-flash": AI.Model["Google_Gemini_2.5_Flash"],
+  "gpt5.1-instant": AI.Model["OpenAI_GPT-5.1_Instant"],
+  "claude-4.5-haiku": AI.Model["Anthropic_Claude_4.5_Haiku"],
+};
 
 export function getAIModel(preference?: AIModelPreference): AI.Model {
-  switch (preference) {
-    case "gemini-2.0-flash":
-      return AI.Model["Google_Gemini_2.0_Flash"];
-    case "gemini-2.5-flash":
-      return AI.Model["Google_Gemini_2.5_Flash"];
-    case "gpt5-mini":
-      return AI.Model["OpenAI_GPT5-mini"];
-    case "claude-haiku":
-      return AI.Model.Anthropic_Claude_Haiku;
-    default:
-      return AI.Model["Google_Gemini_2.0_Flash"];
-  }
+  return (preference && MODEL_MAP[preference]) || AI.Model["Anthropic_Claude_4.5_Haiku"];
 }
 
 export interface VoiceCommandOptions {
