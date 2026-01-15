@@ -1,23 +1,16 @@
 import { Detail, getPreferenceValues, type LaunchProps, LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { VoiceCommandView } from "./components/VoiceCommandView";
-import type { AIModelPreference } from "./utils/ai";
 
 interface Arguments {
   locale?: string;
   recognitionMode?: string;
 }
 
-interface Preferences {
-  locale: string;
-  onDeviceOnly: boolean;
-  aiModel: AIModelPreference;
-}
-
 const LAST_LOCALE_KEY = "lastUsedLocale";
 
 export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
   const [locale, setLocale] = useState<string | null>(null);
 
   const onDevice = props.arguments.recognitionMode

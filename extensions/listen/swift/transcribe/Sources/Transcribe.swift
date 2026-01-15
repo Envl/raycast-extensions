@@ -63,12 +63,12 @@ class SpeechRecognizer: NSObject {
     private var stopRequested = false
     private let ipc: TranscriptionIPC
 
-    init(locale: String, onDevice: Bool, ipc: TranscriptionIPC) {
+    init?(locale: String, onDevice: Bool, ipc: TranscriptionIPC) {
         self.locale = Locale(identifier: locale)
         self.onDevice = onDevice
         self.ipc = ipc
         guard let recognizer = SFSpeechRecognizer(locale: self.locale) else {
-            fatalError("Speech recognizer not available for locale: \(locale)")
+            return nil
         }
         self.speechRecognizer = recognizer
         super.init()
@@ -195,7 +195,15 @@ class SpeechRecognizer: NSObject {
     onDevice: Bool = false
 ) -> String {
     let ipc = TranscriptionIPC()
-    let recognizer = SpeechRecognizer(locale: locale, onDevice: onDevice, ipc: ipc)
+
+    guard let recognizer = SpeechRecognizer(locale: locale, onDevice: onDevice, ipc: ipc) else {
+        ipc.writeStatus([
+            "type": "error",
+            "message": "Speech recognizer not available for locale: \(locale)",
+            "timestamp": Date().timeIntervalSince1970
+        ])
+        return ipc.statusFile.path
+    }
 
     // Clear any existing stop signal
     ipc.clearStopSignal()

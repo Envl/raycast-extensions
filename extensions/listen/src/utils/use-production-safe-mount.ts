@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-export function useProductionSafeMount(mountFn: () => void, deps: unknown[] = []) {
+export function useProductionSafeMount(mountFn: () => (() => void) | undefined, deps: unknown[] = []) {
   const hasRun = useRef(false);
   const cleanupRef = useRef<(() => void) | null>(null);
 
